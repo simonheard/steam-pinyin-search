@@ -8,6 +8,7 @@ export interface SearchableGame {
   name: string;
   localizedName?: string;
   normalized: string;
+  normalizedName: string;
   pinyinFull: string;
   pinyinCompact: string;
   initials: string;
@@ -15,7 +16,7 @@ export interface SearchableGame {
   aliases: string[];
 }
 
-export interface LibraryGameIndex extends SearchableGame {}
+export type LibraryGameIndex = SearchableGame;
 
 export interface StoreGameIndex extends SearchableGame {
   type: string;

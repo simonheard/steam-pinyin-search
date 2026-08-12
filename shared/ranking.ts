@@ -10,11 +10,15 @@ const NO_MATCH: ScoreDetails = { score: 0, field: 'substring' };
 
 export function scoreGame(game: SearchableGame, rawQuery: string): ScoreDetails {
   const query = normalizeSearchText(rawQuery);
+  return scoreNormalizedGame(game, query);
+}
+
+export function scoreNormalizedGame(game: SearchableGame, query: string): ScoreDetails {
   if (!query) return NO_MATCH;
 
-  const name = normalizeSearchText(game.name);
-  const localizedName = normalizeSearchText(game.localizedName ?? '');
-  const aliases = game.aliases.map(normalizeSearchText);
+  const name = game.normalizedName;
+  const localizedName = game.localizedName ? game.normalized : '';
+  const aliases = game.aliases;
 
   if (query === name || (localizedName && query === localizedName)) return { score: 1000, field: 'name-exact' };
   if (query === game.normalized) return { score: 980, field: 'normalized-exact' };

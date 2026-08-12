@@ -7,6 +7,7 @@ export function indexLibraryGame(game: LibraryGameSource): LibraryGameIndex {
     ...game,
     ...createPinyinFields(game.name),
     normalized: normalizeSearchText(game.name),
+    normalizedName: normalizeSearchText(game.name),
     aliases: [],
   };
 }
@@ -19,6 +20,7 @@ export function indexStoreGame(
     ...game,
     ...createPinyinFields(searchableName),
     normalized: normalizeSearchText(searchableName),
+    normalizedName: normalizeSearchText(game.name),
     aliases: game.aliases.map(normalizeSearchText).filter(Boolean),
   };
 }
