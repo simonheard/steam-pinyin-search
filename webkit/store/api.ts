@@ -4,6 +4,10 @@ import { LruCache } from './lru';
 
 const DEFAULT_TIMEOUT_MS = 1_500;
 
+export class StoreSearchTimeoutError extends Error {
+  override readonly name = 'StoreSearchTimeoutError';
+}
+
 function isStoreSearchResponse(value: unknown): value is StoreSearchResponse {
   if (typeof value !== 'object' || value === null) return false;
   const candidate = value as Partial<StoreSearchResponse>;
@@ -40,7 +44,11 @@ export class StoreSearchClient {
     this.#activeController?.abort();
     const controller = new AbortController();
     this.#activeController = controller;
-    const timeout = globalThis.setTimeout(() => controller.abort(), this.timeoutMs);
+    let timedOut = false;
+    const timeout = globalThis.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, this.timeoutMs);
 
     try {
       const url = new URL('/api/search', this.baseUrl);
@@ -57,6 +65,11 @@ export class StoreSearchClient {
       if (!isStoreSearchResponse(body)) throw new TypeError('Store search returned an invalid response');
       this.#cache.set(cacheKey, body);
       return body;
+    } catch (error) {
+      if (timedOut && error instanceof DOMException && error.name === 'AbortError') {
+        throw new StoreSearchTimeoutError(`Store search timed out after ${this.timeoutMs} ms`);
+      }
+      throw error;
     } finally {
       globalThis.clearTimeout(timeout);
       if (this.#activeController === controller) this.#activeController = null;

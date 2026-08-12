@@ -1,5 +1,6 @@
 import type { StoreSearchResponse } from '../../shared/types';
 import { navigateToStoreApp } from '../steam-integration/store-search-elements';
+import type { StoreSearchSource } from './provider';
 
 const ROOT_ATTRIBUTE = 'data-steam-pinyin-search-dropdown';
 
@@ -35,7 +36,7 @@ export class StoreSearchDropdown {
     this.#root.style.width = `${Math.max(rect.width, 300)}px`;
   };
 
-  render(response: StoreSearchResponse): void {
+  render(response: StoreSearchResponse, source: StoreSearchSource = 'remote'): void {
     this.#root.replaceChildren();
     if (response.results.length === 0) {
       this.hide();
@@ -43,7 +44,7 @@ export class StoreSearchDropdown {
     }
 
     const heading = document.createElement('div');
-    heading.textContent = 'Pinyin Search';
+    heading.textContent = source === 'remote' ? 'Pinyin Search · Remote' : 'Pinyin Search · Local';
     Object.assign(heading.style, {
       padding: '8px 12px',
       color: '#66c0f4',

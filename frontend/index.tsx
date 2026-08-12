@@ -102,7 +102,7 @@ function SettingsContent() {
     <DialogBodyText>
       <strong>Library:</strong> {status.message}
       <br />
-      <strong>Privacy:</strong> Library names never leave this device. Store search sends only the typed query.
+      <strong>Privacy:</strong> Library names never leave this device. Store search is local unless you configure a server; remote mode sends only the typed query.
     </DialogBodyText>
   );
 }

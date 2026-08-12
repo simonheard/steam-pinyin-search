@@ -137,6 +137,8 @@ It requires any Steam Web API key and is a Service interface called using `input
 
 The server adapter will use this official endpoint with games enabled and other types disabled. The key is server-only. Synchronization is paged, rate-limited, cached in SQLite, and incremental after the first complete pass.
 
+On 2026-08-12 the deprecated keyless endpoint also returned HTTP 404 to a direct GET check. It therefore cannot safely bootstrap an on-device catalog. The Store plugin now defaults to a persistent local catalog that can be imported and that learns successful results from an explicitly configured remote server. With no server configured it performs no plugin network request; with a configured server it searches remotely first and falls back to the local catalog on network/HTTP/timeout failure. A fresh local catalog is intentionally empty rather than silently using an undocumented endpoint or embedding a user Web API key.
+
 ### Localized Chinese names
 
 Steam officially supports localized application names and documents `schinese`/`zh-CN` and `tchinese`/`zh-TW`. However, the documented `IStoreService/GetAppList` response does not promise all localized titles. `have_description_language` is a filter, not a localized-name projection.
@@ -179,7 +181,9 @@ The package contains the pronunciation data, so it is not tiny, but it is accept
 - Local Library index generated with `pinyin-pro`, incrementally cached in `localStorage`.
 - Original Library filter enhanced through its existing suggestion-ID set.
 - Plain TypeScript WebKit Store adapter and dropdown.
-- No native plugin backend is needed for the MVP; the remote Store API is accessed directly from WebKit with strict timeout/fail-open behavior. A Lua backend would add complexity without improving Library privacy or Store reliability.
+- Local-by-default Store catalog, bounded to 10,000 learned/imported public entries, with the same shared pinyin ranking code.
+- Optional user-configured remote Store API with strict timeout, cancellation, local fallback, and fail-open behavior.
+- No native plugin backend is needed for the MVP. A Lua backend would add complexity without improving Library privacy or Store reliability.
 
 ### Server
 

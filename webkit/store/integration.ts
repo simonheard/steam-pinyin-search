@@ -1,8 +1,9 @@
 import { createLogger } from '../../shared/logger';
 import { normalizeSearchText } from '../../shared/normalize';
 import { findStoreSearchElements } from '../steam-integration/store-search-elements';
-import { StoreSearchClient } from './api';
 import { StoreSearchDropdown } from './dropdown';
+import type { LocalStoreCatalogEntry } from './local';
+import { HybridStoreSearchClient, readConfiguredApiBaseUrl, writeConfiguredApiBaseUrl } from './provider';
 
 const DEBOUNCE_MS = 200;
 const logger = createLogger(localStorage.getItem('steam-pinyin-search:debug') === '1');
@@ -10,14 +11,18 @@ const logger = createLogger(localStorage.getItem('steam-pinyin-search:debug') ==
 export interface StoreIntegrationHandle {
   cleanup(): void;
   isConnected(): boolean;
+  configureRemoteServer(url: string | null): void;
+  importLocalCatalog(entries: LocalStoreCatalogEntry[] | { games: LocalStoreCatalogEntry[] }): number;
+  clearLocalCatalog(): void;
+  status(): { mode: 'local' | 'remote'; localGames: number; remoteServer: string | null };
 }
 
 export function installStoreSearch(): StoreIntegrationHandle | null {
   const elements = findStoreSearchElements();
   if (!elements) return null;
 
-  const apiBaseUrl = localStorage.getItem('steam-pinyin-search:api-base-url') ?? 'http://127.0.0.1:8787';
-  const client = new StoreSearchClient(apiBaseUrl);
+  const apiBaseUrl = readConfiguredApiBaseUrl();
+  const client = new HybridStoreSearchClient(apiBaseUrl);
   const dropdown = new StoreSearchDropdown(elements.anchor);
   let debounceTimer: number | null = null;
 
@@ -33,8 +38,9 @@ export function installStoreSearch(): StoreIntegrationHandle | null {
     debounceTimer = window.setTimeout(() => {
       void client
         .search(query, 10)
-        .then((response) => {
-          if (normalizeSearchText(elements.input.value) === query) dropdown.render(response);
+        .then(({ response, source }) => {
+          if (source === 'local-fallback') logger.debug('remote store request failed; using local catalog');
+          if (normalizeSearchText(elements.input.value) === query) dropdown.render(response, source);
         })
         .catch((error: unknown) => {
           dropdown.hide();
@@ -53,10 +59,22 @@ export function installStoreSearch(): StoreIntegrationHandle | null {
   document.addEventListener('pointerdown', onDocumentPointerDown, true);
   window.addEventListener('resize', dropdown.reposition);
   window.addEventListener('scroll', dropdown.reposition, true);
-  logger.info('store hook mounted');
+  logger.info('store hook mounted', { mode: client.mode, localGames: client.local.size });
 
   return {
     isConnected: () => elements.input.isConnected && elements.anchor.isConnected,
+    configureRemoteServer(url) {
+      writeConfiguredApiBaseUrl(url);
+    },
+    importLocalCatalog(entries) {
+      return client.local.importCatalog(entries);
+    },
+    clearLocalCatalog() {
+      client.local.clear();
+    },
+    status() {
+      return { mode: client.mode, localGames: client.local.size, remoteServer: apiBaseUrl };
+    },
     cleanup() {
       if (debounceTimer !== null) window.clearTimeout(debounceTimer);
       client.cancel();

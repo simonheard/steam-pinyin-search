@@ -1,8 +1,8 @@
 # Steam Pinyin Search
 
-A Millennium 3.4 plugin that adds full-pinyin, compact-pinyin, and pinyin-initial matching to the Steam desktop Library, plus a failure-isolated Store autocomplete backed by a shared public catalog API.
+A Millennium 3.4 plugin that adds full-pinyin, compact-pinyin, and pinyin-initial matching to the Steam desktop Library, plus a failure-isolated Store autocomplete with local and user-configured remote modes.
 
-Library data stays on the user's machine. Store requests contain only the normalized query and result limit; there is no Steam ID, library upload, analytics, account system, service, or resident process.
+Library data stays on the user's machine. Store search makes no plugin network request unless the user configures a remote server. Remote requests contain only the normalized query and result limit; there is no Steam ID, library upload, analytics, account system, service, or resident process.
 
 ## Platform compatibility
 
@@ -18,7 +18,7 @@ The plugin contains no native binary and has no Millennium Python backend (`useB
 
 - Library: patches Steam's existing `SetSearchText` flow and adds matching AppIDs through `SetSearchSuggestions`.
 - Local index: original/normalized name, phrase-aware pinyin, compact pinyin, initials, aliases, schema-versioned cache, and AppID/name diffing.
-- Store: 200 ms debounce, minimum two characters, 1.5 second timeout, cancellation, 50-query LRU, separate dropdown, and unchanged native Enter behavior.
+- Store: local-by-default catalog, optional user-configured remote server, automatic local learning/fallback, 200 ms debounce, minimum two characters, 1.5 second timeout, cancellation, 50-query LRU, separate dropdown, and unchanged native Enter behavior.
 - API: Fastify + SQLite + in-memory search index; official `IStoreService/GetAppList` synchronization; game-only results by default.
 - Localized title enrichment: optional, rate-limited, cached, isolated adapter for Steam's undocumented `appdetails` endpoint. It is disabled by default.
 
@@ -102,13 +102,29 @@ npm run server
 
 For production, run `npm run build:server`, then start `node dist/server/src/cli.js`; schedule `node dist/server/src/sync-cli.js` separately. The sync cursor advances only after a successful page set. Rebuild the process after synchronization so the RAM index reloads. Put HTTPS and ordinary rate limiting in a reverse proxy when exposing the API publicly.
 
-Point the Store WebKit client at the deployment from the Store DevTools console, then reload the page:
+Store mode defaults to local and makes no plugin API request. Successful remote results are retained in the local pinyin catalog (up to 10,000 games), so they remain searchable after the server is removed or unavailable. Configure a server from the Store DevTools console:
 
 ```js
-localStorage.setItem('steam-pinyin-search:api-base-url', 'https://search.example.com');
+SteamPinyinSearch.configureRemoteServer('https://search.example.com');
 ```
 
-The default is `http://127.0.0.1:8787` for development. A public release should ship with the operator's HTTPS URL configured in `webkit/store/integration.ts`.
+Return to local-only mode, inspect status, or clear the learned catalog with:
+
+```js
+SteamPinyinSearch.configureRemoteServer(null);
+SteamPinyinSearch.status();
+SteamPinyinSearch.clearLocalCatalog();
+```
+
+The local catalog can also be populated from a trusted JSON array without configuring a server:
+
+```js
+SteamPinyinSearch.importLocalCatalog([
+  { appid: 123, name: 'English title', localizedName: '中文标题', aliases: ['optional alias'] }
+]);
+```
+
+The example AppID is only a schema placeholder. A fresh local catalog is empty, so until entries are learned or imported only Steam's native search results appear. The plugin deliberately does not use Valve's deprecated keyless full AppList endpoint (currently unavailable), and it never places an `IStoreService` Web API key in the client. Changing modes takes effect immediately.
 
 ## Debugging
 
