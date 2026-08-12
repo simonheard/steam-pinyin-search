@@ -4,6 +4,16 @@ A Millennium 3.4 plugin that adds full-pinyin, compact-pinyin, and pinyin-initia
 
 Library data stays on the user's machine. Store requests contain only the normalized query and result limit; there is no Steam ID, library upload, analytics, account system, service, or resident process.
 
+## Platform compatibility
+
+| Platform | Millennium status | This plugin |
+| --- | --- | --- |
+| Windows 10/11, x64 | Officially supported | Runtime-validated with Millennium 3.4.0 and Steam Stable; novice bundle available. |
+| Native Linux Steam, x86/x86_64 | Officially supported | The frontend-only plugin is designed to be portable, but Linux build and Steam runtime validation are still pending. Flatpak Steam, Snap Steam, and ARM distributions are not supported by Millennium. |
+| macOS | Not listed as a supported end-user platform; upstream has an experimental source-built wrapper | Treat both Millennium and this plugin as experimental on macOS; build and Steam runtime validation are still pending, and no novice bundle is provided. |
+
+The plugin contains no native binary and has no Millennium Python backend (`useBackend: false`), so its packaged JavaScript is platform-neutral. That does not guarantee that Steam's internal Library hooks are identical on every OS; the native search remains untouched if discovery fails. See [docs/publishing.md](docs/publishing.md) for platform paths and the official publication workflow.
+
 ## Current scope
 
 - Library: patches Steam's existing `SetSearchText` flow and adds matching AppIDs through `SetSearchSuggestions`.
@@ -16,7 +26,7 @@ The implementation decisions and exact 2026 sources are in [docs/research.md](do
 
 ## Prerequisites
 
-- Windows Steam desktop client.
+- Steam desktop client on a Millennium-supported platform.
 - [Millennium v3.4.0 or newer](https://github.com/SteamClientHomebrew/Millennium/releases).
 - For development: Bun, as used by the official template, or Node.js 22.5+ and npm. This repository's validation uses npm.
 - For catalog synchronization: a server-side Steam Web API key. Never put it in the plugin bundle.
@@ -40,7 +50,11 @@ npm run build
 
 ## Install the plugin locally
 
-Build it, then link or copy this repository as a directory named `steam-pinyin-search` under the current Millennium v3.4 Windows plugin directory (`%STEAM%\millennium\plugins`). The folder must contain `plugin.json` and `.millennium\Dist\index.js` / `webkit.js`.
+Build it, then link or copy this repository as a directory named `steam-pinyin-search` under the plugin directory. The folder must contain `plugin.json` and `.millennium/Dist/index.js` / `webkit.js`.
+
+- Windows v3.4 runtime used for this project: `%STEAM%\millennium\plugins\steam-pinyin-search`
+- Linux: `~/.local/share/millennium/plugins/steam-pinyin-search`
+- macOS experimental source build: `~/Library/Application Support/Millennium/plugins/steam-pinyin-search`
 
 For a self-contained archive:
 
@@ -48,7 +62,13 @@ For a self-contained archive:
 npm run package:plugin
 ```
 
-Extract the resulting `artifacts\steam-pinyin-search-v0.1.0.zip` into the Millennium plugin directory. In Steam, open **Settings → Millennium → Plugins**, enable **Steam Pinyin Search**, and reload Steam. Enabled plugins load with Steam/Millennium; no separate client process is installed.
+Extract the resulting `artifacts\steam-pinyin-search-v0.1.0.zip` into the platform's Millennium plugin directory. The ZIP is a manual/beta distribution archive; Millennium's **Install a plugin** screen does not accept this local ZIP. In Steam, open **Settings → Millennium → Plugins**, enable **Steam Pinyin Search**, and reload Steam. Enabled plugins load with Steam/Millennium; no separate client process is installed.
+
+## Publish to the Millennium plugin store
+
+Do **not** upload the ZIP to Millennium. The current official process is to make the plugin repository public, fork [SteamClientHomebrew/PluginDatabase](https://github.com/SteamClientHomebrew/PluginDatabase), add this repository under `plugins/steam-pinyin-search` as a Git submodule, and open a plugin-submission pull request. The database pins an audited commit; each future plugin update requires another pull request advancing that pointer.
+
+After approval, users install with the plugin ID shown on [steambrew.app/plugins](https://steambrew.app/plugins) from **Millennium Settings → Plugins → Install a plugin**. GitHub Release ZIP assets remain optional and are useful only for manual testers. The current repository is private, so it must be made public before an official submission. The exact commands, review checklist, and release choices are in [docs/publishing.md](docs/publishing.md).
 
 ## Windows novice bundle（裸 Steam 小白整合包）
 
