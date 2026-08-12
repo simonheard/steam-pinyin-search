@@ -21,7 +21,7 @@ services:
     image: steam-pinyin-search-server:local
     profiles: ["tools"]
     environment:
-      STEAM_WEB_API_KEY: "${STEAM_WEB_API_KEY:?Set STEAM_WEB_API_KEY in .env}"
+      STEAM_WEB_API_KEY: "${STEAM_WEB_API_KEY:-}"
       STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS: "${STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS:-false}"
       STEAM_PINYIN_DB: /data/catalog.sqlite
     volumes:
