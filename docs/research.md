@@ -38,10 +38,10 @@ There is a documentation/schema mismatch worth tracking: the schema in the Mille
 
 Millennium is loaded with Steam and enabled plugins are loaded as part of that lifecycle. A plugin does not need a Windows service, Electron application, or independent daemon.
 
-On Windows, current runtime source (`src/system/environment.cc`) sets `MILLENNIUM__PLUGINS_PATH` to `%STEAM%/plugins`, and the current official quick start uses the same plural directory. The filesystem reference page still says `%STEAM%/plugin` (singular), so it is stale on this point; runtime source is the implementation authority. The quick start permits developing elsewhere and linking the project directory into the plugin directory. The template workflow is:
+On Windows, current runtime source (`src/system/environment.cc`) sets `MILLENNIUM__PLUGINS_PATH` to `<installPath>/plugins`. In the official v3.4.0 binary, `installPath` resolves to `%STEAM%/millennium`, so the verified runtime directory is `%STEAM%/millennium/plugins`. The current quick start says `%STEAM%/plugins` and the filesystem reference says `%STEAM%/plugin`; both documentation paths are stale for the installed v3.4.0 Windows binary. Runtime source plus an actual signed v3.4.0 installation is the implementation authority.
 
 1. Install current stable Millennium.
-2. Put or link the plugin under `%STEAM%/plugins/<plugin-name>`.
+2. Put or link the plugin under `%STEAM%/millennium/plugins/<plugin-name>` on current Windows v3.4.0.
 3. Run `bun install` and `bun run dev` (development build) or `bun run build` (production build).
 4. Enable the plugin in Steam Settings → Millennium → Plugins.
 5. Reload/restart Steam after structural or backend changes. Frontend development builds are rebuilt by the TTC workflow; Steam DevTools and Millennium logs are the authoritative debugging surfaces.
@@ -201,7 +201,7 @@ Node/TypeScript was selected over FastAPI so normalization, pinyin conversion, r
 5. **No local Millennium installation:** compilation and automated tests can run here, but actual Steam injection/log verification requires installing Millennium 3.4.0 and enabling the built plugin.
 6. **Very recent framework release:** v3.4.0 became stable on 2026-08-10. Minor SDK/template inconsistencies are possible; package versions are pinned and CI should detect drift.
 7. **Multi-pronunciation:** default phrase pronunciation is deliberately used for the MVP. Variant expansion is represented in the schema but not enabled broadly due to index growth and ranking noise.
-8. **Documentation path mismatch:** the filesystem reference says Windows uses singular `plugin`, while the v3.4.0 runtime and quick start use plural `plugins`. Packaging/install instructions follow the runtime source.
+8. **Documentation path mismatch:** the filesystem reference says `%STEAM%/plugin` and quick start says `%STEAM%/plugins`, while the signed v3.4.0 runtime uses `%STEAM%/millennium/plugins`. Packaging follows the verified runtime.
 
 ## Key sources
 
