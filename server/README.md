@@ -70,6 +70,8 @@ docker compose up -d --build api
 
 The server accepts no SteamID, library list, account token, machine ID, or analytics payload. `/api/search` receives only `q` and `limit`.
 
+The API container may run without a Web API key when `STEAM_PINYIN_SYNC_ON_START=false`, for example when serving an already-populated persistent volume. Catalog sync still requires the key, and the `sync` Compose profile fails fast when it is missing.
+
 ## Without Docker
 
 Node.js 22.5 or newer is supported:
