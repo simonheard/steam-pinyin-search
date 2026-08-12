@@ -22,8 +22,9 @@ export async function syncCatalog(
   let fetched = 0;
   let written = 0;
   let enriched = 0;
+  let continuePaging = true;
 
-  do {
+  while (continuePaging) {
     const page = await source.fetchPage({ lastAppId, ifModifiedSince });
     fetched += page.apps.length;
     const records: CatalogApp[] = [];
@@ -46,9 +47,9 @@ export async function syncCatalog(
     }
     repository.upsertApps(records);
     written += records.length;
-    if (!page.hasMore || page.lastAppId === null || page.lastAppId === lastAppId) break;
-    lastAppId = page.lastAppId;
-  } while (true);
+    if (!page.hasMore || page.lastAppId === null || page.lastAppId === lastAppId) continuePaging = false;
+    else lastAppId = page.lastAppId;
+  }
 
   const completedAt = Math.floor(Date.now() / 1000);
   repository.setState(LAST_SYNC_KEY, String(completedAt));
