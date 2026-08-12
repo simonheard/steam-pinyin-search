@@ -1,0 +1,12 @@
+[Unit]
+Description=Incrementally synchronize the Steam Pinyin Search catalog
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/steam-pinyin-search
+ExecStart=/usr/bin/flock --nonblock /run/steam-pinyin-search-sync.lock /usr/bin/docker compose --profile tools run --rm sync
+ExecStartPost=/usr/bin/curl --fail --silent --show-error http://127.0.0.1:8787/health
+

@@ -1,0 +1,12 @@
+[Unit]
+Description=Daily Steam Pinyin Search catalog synchronization
+
+[Timer]
+OnCalendar=*-*-* 04:15:00 UTC
+RandomizedDelaySec=30m
+Persistent=true
+Unit=steam-pinyin-search-sync.service
+
+[Install]
+WantedBy=timers.target
+

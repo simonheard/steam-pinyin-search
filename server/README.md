@@ -50,6 +50,17 @@ docker compose restart api
 
 For scheduled updates, run the sync command from cron/systemd timer or the hosting platform's scheduled-job facility. Do not run multiple sync jobs concurrently against the same SQLite file.
 
+For a Linux host deployed at `/opt/steam-pinyin-search`, reusable systemd units are included:
+
+```bash
+sudo install -m 0644 deploy/systemd/steam-pinyin-search-sync.service /etc/systemd/system/
+sudo install -m 0644 deploy/systemd/steam-pinyin-search-sync.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now steam-pinyin-search-sync.timer
+```
+
+The timer runs daily with a randomized delay, prevents overlapping syncs, and refreshes the API's in-memory index afterward.
+
 ## Update the application
 
 ```bash
