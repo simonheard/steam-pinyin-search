@@ -33,7 +33,9 @@ export class SteamStoreServiceCatalogSource implements CatalogSource {
       ...(options.lastAppId ? { last_appid: options.lastAppId } : {}),
       ...(options.ifModifiedSince ? { if_modified_since: options.ifModifiedSince } : {}),
     };
-    const url = new URL('https://partner.steam-api.com/IStoreService/GetAppList/v1/');
+    // Community Web API keys work on the public Web API host. The Partner host
+    // returns 403 unless the key belongs to a Steamworks publisher account.
+    const url = new URL('https://api.steampowered.com/IStoreService/GetAppList/v1/');
     url.searchParams.set('key', this.apiKey);
     url.searchParams.set('input_json', JSON.stringify(input));
     const response = await this.fetchImplementation(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(20_000) });

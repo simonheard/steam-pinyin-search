@@ -1,9 +1,10 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { buildServer } from '../server/src/app';
 import { MemoryCatalogRepository } from '../server/src/catalog/memory-repository';
 import type { CatalogDetailsAdapter, CatalogSource } from '../server/src/catalog/types';
 import { syncCatalog } from '../server/src/catalog/sync';
+import { SteamStoreServiceCatalogSource } from '../server/src/catalog/steam-store-service';
 
 const openApps: Array<ReturnType<typeof buildServer> extends Promise<infer T> ? T : never> = [];
 
@@ -55,6 +56,22 @@ describe('store search API', () => {
 });
 
 describe('catalog sync', () => {
+  it('uses the public Steam Web API host for community API keys', async () => {
+    const fetchMock = vi.fn(async (input: URL | RequestInfo) => {
+      void input;
+      return new Response(JSON.stringify({ response: { apps: [], have_more_results: false } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+    const source = new SteamStoreServiceCatalogSource('test-key', fetchMock as unknown as typeof fetch);
+
+    await source.fetchPage({});
+
+    const requestedUrl = String(fetchMock.mock.calls[0]?.[0]);
+    expect(new URL(requestedUrl).host).toBe('api.steampowered.com');
+  });
+
   it('paginates, enriches, and records a successful sync', async () => {
     const repository = new MemoryCatalogRepository();
     const source: CatalogSource = {

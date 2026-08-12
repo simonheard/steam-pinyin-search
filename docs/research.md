@@ -126,9 +126,9 @@ Valve's official documentation now explicitly deprecates:
 
 because it no longer scales to Steam's catalog. The documented replacement is:
 
-`GET https://partner.steam-api.com/IStoreService/GetAppList/v1/`
+`GET https://api.steampowered.com/IStoreService/GetAppList/v1/`
 
-It requires any Steam Web API key and is a Service interface called using `input_json`. It supports:
+It requires a Steam Web API key and is a Service interface called using `input_json`. A deployment check on 2026-08-12 confirmed that an ordinary community Web API key succeeds on `api.steampowered.com`, while the same key receives HTTP 403 from `partner.steam-api.com`; the latter is appropriate only for keys with Steamworks publisher access. It supports:
 
 - pagination by `last_appid` (default 10,000, maximum 50,000 results);
 - `include_games`, `include_dlc`, `include_software`, `include_videos`, and `include_hardware` filters;
