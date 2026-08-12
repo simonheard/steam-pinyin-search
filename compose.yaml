@@ -5,7 +5,7 @@ services:
     image: steam-pinyin-search-server:local
     restart: unless-stopped
     ports:
-      - "${STEAM_PINYIN_PUBLIC_PORT:-8787}:8787"
+      - "${STEAM_PINYIN_BIND_ADDRESS:-127.0.0.1}:${STEAM_PINYIN_PUBLIC_PORT:-8787}:8787"
     environment:
       STEAM_WEB_API_KEY: "${STEAM_WEB_API_KEY:?Set STEAM_WEB_API_KEY in .env}"
       STEAM_PINYIN_ALLOWED_ORIGINS: "${STEAM_PINYIN_ALLOWED_ORIGINS:-https://store.steampowered.com,https://checkout.steampowered.com}"

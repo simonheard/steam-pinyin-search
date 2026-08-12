@@ -62,6 +62,7 @@ docker compose up -d --build api
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `STEAM_WEB_API_KEY` | required for sync | Server-only Steam Web API key. |
+| `STEAM_PINYIN_BIND_ADDRESS` | `127.0.0.1` | Host address published by Compose. Keep loopback when using a reverse proxy. |
 | `STEAM_PINYIN_PUBLIC_PORT` | `8787` | Host port published by Compose. |
 | `STEAM_PINYIN_ALLOWED_ORIGINS` | Steam Store/checkout origins | Comma-separated CORS allowlist. |
 | `STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS` | `false` | Enables the rate-limited unofficial Simplified Chinese details adapter. Read `docs/research.md` before enabling. |
