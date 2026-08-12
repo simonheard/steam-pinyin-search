@@ -1,0 +1,15 @@
+.git
+.github
+.millennium
+artifacts
+coverage
+dist
+node_modules
+outputs
+server/data
+work
+*.log
+.env
+.env.*
+!.env.example
+!server/.env.example

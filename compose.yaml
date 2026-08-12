@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      context: .
+    image: steam-pinyin-search-server:local
+    restart: unless-stopped
+    ports:
+      - "${STEAM_PINYIN_PUBLIC_PORT:-8787}:8787"
+    environment:
+      STEAM_WEB_API_KEY: "${STEAM_WEB_API_KEY:?Set STEAM_WEB_API_KEY in .env}"
+      STEAM_PINYIN_ALLOWED_ORIGINS: "${STEAM_PINYIN_ALLOWED_ORIGINS:-https://store.steampowered.com,https://checkout.steampowered.com}"
+      STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS: "${STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS:-false}"
+      STEAM_PINYIN_SYNC_ON_START: "${STEAM_PINYIN_SYNC_ON_START:-true}"
+      STEAM_PINYIN_HOST: 0.0.0.0
+      STEAM_PINYIN_PORT: 8787
+      STEAM_PINYIN_DB: /data/catalog.sqlite
+    volumes:
+      - catalog-data:/data
+
+  sync:
+    image: steam-pinyin-search-server:local
+    profiles: ["tools"]
+    environment:
+      STEAM_WEB_API_KEY: "${STEAM_WEB_API_KEY:?Set STEAM_WEB_API_KEY in .env}"
+      STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS: "${STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS:-false}"
+      STEAM_PINYIN_DB: /data/catalog.sqlite
+    volumes:
+      - catalog-data:/data
+    command: ["node", "dist/server/src/sync-cli.js"]
+
+volumes:
+  catalog-data:
