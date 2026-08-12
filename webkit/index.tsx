@@ -1,6 +1,7 @@
 import { installStoreSearch, type StoreIntegrationHandle } from './store/integration';
 import { LocalStoreSearchClient, type LocalStoreCatalogEntry } from './store/local';
 import { readConfiguredApiBaseUrl, writeConfiguredApiBaseUrl } from './store/provider';
+import { readWebkitStoreSettings } from './store/settings';
 
 const GLOBAL_KEY = '__steamPinyinSearchWebkit';
 
@@ -20,18 +21,23 @@ type PluginGlobal = typeof globalThis & { [GLOBAL_KEY]?: GlobalState; SteamPinyi
 export default async function WebkitMain(): Promise<void> {
   const scope = globalThis as PluginGlobal;
   scope[GLOBAL_KEY]?.cleanup();
+  const pluginSettings = readWebkitStoreSettings();
+  if (!pluginSettings.enabled) new LocalStoreSearchClient().clear();
 
   let integration: StoreIntegrationHandle | null = null;
   const refresh = (): void => {
+    if (!pluginSettings.enabled) return;
     if (integration && !integration.isConnected()) {
       integration.cleanup();
       integration = null;
     }
-    integration ??= installStoreSearch();
+    integration ??= installStoreSearch(pluginSettings.remoteServer);
   };
   const observer = new MutationObserver(refresh);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
-  refresh();
+  if (pluginSettings.enabled) {
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    refresh();
+  }
 
   scope.SteamPinyinSearch = {
     configureRemoteServer(url) {
@@ -50,7 +56,7 @@ export default async function WebkitMain(): Promise<void> {
     },
     status() {
       if (integration) return integration.status();
-      const remoteServer = readConfiguredApiBaseUrl();
+      const remoteServer = pluginSettings.remoteServer ?? readConfiguredApiBaseUrl();
       return { mode: remoteServer ? 'remote' : 'local', localGames: new LocalStoreSearchClient().size, remoteServer };
     },
   };

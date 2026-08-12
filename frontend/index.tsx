@@ -1,7 +1,8 @@
-import { DialogBodyText, IconsModule, definePlugin, routerHook, useWindowRef } from '@steambrew/client';
+import { DialogBodyText, DialogButton, IconsModule, TextField, ToggleField, definePlugin, routerHook, usePluginConfig, useWindowRef } from '@steambrew/client';
 import { useEffect, useState } from 'react';
 
 import { createLogger } from '../shared/logger';
+import { normalizeServerUrl, STORE_SEARCH_ENABLED_KEY, STORE_SERVER_URL_KEY } from '../shared/plugin-settings';
 import { buildLibraryIndex } from './library/indexer';
 import { LibrarySearchIndex } from './library/search';
 import { findLibrarySearchInput, installLibrarySearchInputHook } from './steam-integration/library-search-input';
@@ -93,17 +94,62 @@ async function startLibraryIntegration(): Promise<void> {
 
 function SettingsContent() {
   const [status, setStatus] = useState(runtimeStatus);
+  const [storeEnabledValue, setStoreEnabled] = usePluginConfig<boolean>(STORE_SEARCH_ENABLED_KEY);
+  const [storedServerUrl, setStoredServerUrl] = usePluginConfig<string>(STORE_SERVER_URL_KEY);
+  const [serverDraft, setServerDraft] = useState('');
+  const [serverMessage, setServerMessage] = useState('');
+  const storeEnabled = storeEnabledValue !== false;
+
   useEffect(() => {
     const timer = window.setInterval(() => setStatus({ ...runtimeStatus }), 500);
     return () => window.clearInterval(timer);
   }, []);
+  useEffect(() => setServerDraft(storedServerUrl ?? ''), [storedServerUrl]);
+
+  const saveServer = (): void => {
+    try {
+      const normalized = normalizeServerUrl(serverDraft) ?? '';
+      void setStoredServerUrl(normalized)
+        .then(() => {
+          setServerDraft(normalized);
+          setServerMessage(normalized ? 'Server saved. Reload Steam to apply it.' : 'Local mode saved. Reload Steam to apply it.');
+        })
+        .catch(() => setServerMessage('Could not save the server setting. Check the Millennium logs.'));
+    } catch (error) {
+      setServerMessage(error instanceof Error ? error.message : 'Invalid server URL.');
+    }
+  };
 
   return (
-    <DialogBodyText>
-      <strong>Library:</strong> {status.message}
-      <br />
-      <strong>Privacy:</strong> Library names never leave this device. Store search is local unless you configure a server; remote mode sends only the typed query.
-    </DialogBodyText>
+    <div style={{ display: 'grid', gap: '12px' }}>
+      <DialogBodyText>
+        <strong>Library:</strong> {status.message}
+        <br />
+        <strong>Privacy:</strong> Library names never leave this device. Store search is local unless you configure a server; remote mode sends only the typed query.
+      </DialogBodyText>
+      <ToggleField
+        label="Enable Store pinyin search"
+        description="When disabled, the plugin does not inject Store search, keep local Store data, or send Store requests. Reload Steam after changing this option."
+        checked={storeEnabled}
+        onChange={(checked) => {
+          void setStoreEnabled(checked)
+            .then(() => setServerMessage('Setting saved. Reload Steam to apply it.'))
+            .catch(() => setServerMessage('Could not save the Store switch. Check the Millennium logs.'));
+        }}
+      />
+      <TextField
+        label="Store search server (optional)"
+        description="Leave empty for local-only mode. Use an HTTPS URL for a remotely hosted server."
+        disabled={!storeEnabled}
+        value={serverDraft}
+        onChange={(event) => {
+          setServerDraft(event.currentTarget.value);
+          setServerMessage('');
+        }}
+      />
+      <DialogButton disabled={!storeEnabled} onClick={saveServer}>Save Store settings</DialogButton>
+      {serverMessage ? <DialogBodyText>{serverMessage}</DialogBodyText> : null}
+    </div>
   );
 }
 

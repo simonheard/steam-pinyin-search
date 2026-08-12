@@ -139,6 +139,8 @@ The server adapter will use this official endpoint with games enabled and other 
 
 On 2026-08-12 the deprecated keyless endpoint also returned HTTP 404 to a direct GET check. It therefore cannot safely bootstrap an on-device catalog. The Store plugin now defaults to a persistent local catalog that can be imported and that learns successful results from an explicitly configured remote server. With no server configured it performs no plugin network request; with a configured server it searches remotely first and falls back to the local catalog on network/HTTP/timeout failure. A fresh local catalog is intentionally empty rather than silently using an undocumented endpoint or embedding a user Web API key.
 
+Store enhancement is user-controllable through the plugin's Millennium settings page. The master switch and optional server URL use Millennium 3.4's persistent `usePluginConfig`/`BindPluginSettings` API so the main Steam frontend and Store WebKit views read the same configuration. Turning Store search off skips the observer/UI hook and clears this plugin's local Store catalog on the next Store view load. TTC 3.3.7 currently fails to inject the plugin name into the WebKit `BindPluginSettings` call, so the WebKit adapter passes the stable manifest plugin ID explicitly; the generated production bundle is checked for that binding.
+
 ### Localized Chinese names
 
 Steam officially supports localized application names and documents `schinese`/`zh-CN` and `tchinese`/`zh-TW`. However, the documented `IStoreService/GetAppList` response does not promise all localized titles. `have_description_language` is a filter, not a localized-name projection.

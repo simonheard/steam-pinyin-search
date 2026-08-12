@@ -17,11 +17,11 @@ export interface StoreIntegrationHandle {
   status(): { mode: 'local' | 'remote'; localGames: number; remoteServer: string | null };
 }
 
-export function installStoreSearch(): StoreIntegrationHandle | null {
+export function installStoreSearch(configuredApiBaseUrl?: string | null): StoreIntegrationHandle | null {
   const elements = findStoreSearchElements();
   if (!elements) return null;
 
-  const apiBaseUrl = readConfiguredApiBaseUrl();
+  const apiBaseUrl = configuredApiBaseUrl === undefined ? readConfiguredApiBaseUrl() : configuredApiBaseUrl;
   const client = new HybridStoreSearchClient(apiBaseUrl);
   const dropdown = new StoreSearchDropdown(elements.anchor);
   let debounceTimer: number | null = null;

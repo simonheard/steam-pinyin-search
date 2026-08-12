@@ -27,7 +27,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@steambrew/api": "5.8.4",
-    "@steambrew/client": "5.8.4",
+    "@steambrew/client": "5.8.5",
     "@steambrew/ttc": "3.3.7",
     "@steambrew/webkit": "5.8.4",
     "@types/node": "^22.17.0",

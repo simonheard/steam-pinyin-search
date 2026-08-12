@@ -86,7 +86,17 @@ Current v3.4 runtime validation found that Steam exposes `SetSearchText` as a no
 
 ## Store API setup
 
-Configure environment variables in the shell that starts the server:
+The complete self-hostable Store service is included under `server/`, with a production multi-stage `Dockerfile`, `compose.yaml`, persistent SQLite volume, health check, startup/incremental catalog sync, CORS allowlist, and failure-safe startup. See [server/README.md](server/README.md) for Docker, HTTPS reverse proxy, updates, scheduling, and non-Docker instructions.
+
+Quick Docker start:
+
+```bash
+cp .env.docker.example .env
+# Edit .env and set STEAM_WEB_API_KEY.
+docker compose up -d --build api
+```
+
+For development without Docker, configure environment variables in the shell that starts the server:
 
 ```powershell
 $env:STEAM_WEB_API_KEY = 'server-side-key'
@@ -102,16 +112,18 @@ npm run server
 
 For production, run `npm run build:server`, then start `node dist/server/src/cli.js`; schedule `node dist/server/src/sync-cli.js` separately. The sync cursor advances only after a successful page set. Rebuild the process after synchronization so the RAM index reloads. Put HTTPS and ordinary rate limiting in a reverse proxy when exposing the API publicly.
 
-Store mode defaults to local and makes no plugin API request. Successful remote results are retained in the local pinyin catalog (up to 10,000 games), so they remain searchable after the server is removed or unavailable. Configure a server from the Store DevTools console:
+Store mode defaults to local and makes no plugin API request. Successful remote results are retained in the local pinyin catalog (up to 10,000 games), so they remain searchable after the server is removed or unavailable.
+
+Configure it through **Steam → Settings → Millennium → Plugins → Steam Pinyin Search**:
+
+- **Enable Store pinyin search** is the master switch. Disable it and reload Steam to skip Store injection and delete the plugin's local Store catalog.
+- Leave **Store search server** empty for local-only mode.
+- Enter the self-hosted HTTPS base URL for remote-first search with automatic local fallback.
+- Save, then reload Steam to apply the settings across Store WebKit views.
+
+The Store DevTools API remains available for diagnostics and catalog management:
 
 ```js
-SteamPinyinSearch.configureRemoteServer('https://search.example.com');
-```
-
-Return to local-only mode, inspect status, or clear the learned catalog with:
-
-```js
-SteamPinyinSearch.configureRemoteServer(null);
 SteamPinyinSearch.status();
 SteamPinyinSearch.clearLocalCatalog();
 ```
@@ -124,7 +136,7 @@ SteamPinyinSearch.importLocalCatalog([
 ]);
 ```
 
-The example AppID is only a schema placeholder. A fresh local catalog is empty, so until entries are learned or imported only Steam's native search results appear. The plugin deliberately does not use Valve's deprecated keyless full AppList endpoint (currently unavailable), and it never places an `IStoreService` Web API key in the client. Changing modes takes effect immediately.
+The example AppID is only a schema placeholder. A fresh local catalog is empty, so until entries are learned or imported only Steam's native search results appear. The plugin deliberately does not use Valve's deprecated keyless full AppList endpoint (currently unavailable), and it never places an `IStoreService` Web API key in the client.
 
 ## Debugging
 
@@ -154,7 +166,7 @@ Tests cover normalization, pinyin, initials, ranking, cache diffs, a 5,000-game 
 
 - **Plugin is absent:** verify the directory name, `plugin.json`, compiled `.millennium/Dist` files, and that the plugin is enabled in Millennium settings.
 - **Library search is unchanged:** enable debug logging. Steam may have changed `appStore`, `LibraryUIStore`, `MatchesImpl`, or `SetSearchSuggestions`; native search remains intact when discovery fails.
-- **Store dropdown is absent:** queries shorter than two normalized characters intentionally do nothing. Check the configured API URL, CORS origin, HTTPS/mixed-content policy, and WebKit DevTools.
+- **Store dropdown is absent:** confirm Store search is enabled and Steam was reloaded after the settings change. Queries shorter than two normalized characters intentionally do nothing. Check the configured API URL, CORS origin, HTTPS/mixed-content policy, and WebKit DevTools.
 - **API returns no games:** run catalog sync with a valid server-side Web API key, then restart the API to reload its in-memory index.
 - **Chinese Store titles are missing:** the official bulk catalog does not provide a dependable `schinese` title field. Enable the optional details adapter only after accepting the documented unofficial-endpoint risk and synchronization cost.
 - **Steam update broke selectors:** update only the centralized semantic selector/fallback lists; do not scatter hashed class names across UI code.
