@@ -1,0 +1,42 @@
+{
+  "name": "steam-pinyin-search",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Millennium plugin and Store API for Steam pinyin search",
+  "scripts": {
+    "dev": "millennium-ttc --build dev",
+    "build:plugin": "millennium-ttc --build prod",
+    "build:server": "tsc -p server/tsconfig.json",
+    "build": "npm run build:plugin && npm run build:server",
+    "typecheck": "tsc -p tsconfig.check.json --noEmit && tsc -p server/tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "benchmark": "tsx benchmarks/library-search.ts",
+    "server": "tsx server/src/cli.ts",
+    "server:sync": "tsx server/src/sync-cli.ts"
+  },
+  "dependencies": {
+    "fastify": "^5.5.0",
+    "pinyin-pro": "3.28.2"
+  },
+  "devDependencies": {
+    "@steambrew/api": "5.8.4",
+    "@steambrew/client": "5.8.4",
+    "@steambrew/ttc": "3.3.7",
+    "@steambrew/webkit": "5.8.4",
+    "@types/node": "^22.17.0",
+    "@types/react": "19.1.1",
+    "@types/react-dom": "19.1.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22.5"
+  },
+  "overrides": {
+    "serialize-javascript": "7.0.5"
+  },
+  "license": "MIT"
+}

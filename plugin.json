@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SteamClientHomebrew/Millennium/main/src/system/plugin-schema.json",
+  "name": "steam-pinyin-search",
+  "common_name": "Steam Pinyin Search",
+  "description": "Local pinyin search for the Steam Library and privacy-preserving public Store search.",
+  "version": "0.1.0",
+  "useBackend": false,
+  "webkitApiVersion": "2.0.0"
+}

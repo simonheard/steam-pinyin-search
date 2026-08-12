@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "outDir": ".millennium/Dist",
+    "module": "ESNext",
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "declaration": false,
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  }
+}
