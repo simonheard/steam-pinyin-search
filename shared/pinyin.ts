@@ -1,6 +1,6 @@
 import { pinyin } from 'pinyin-pro';
 
-import { containsHan, normalizeSearchText } from './normalize';
+import { containsHan, normalizeSearchText } from './normalize.js';
 
 export interface PinyinFields {
   pinyinFull: string;

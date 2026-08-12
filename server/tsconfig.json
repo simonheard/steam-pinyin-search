@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "..",
+    "outDir": "../dist",
+    "types": ["node"],
+    "lib": ["ES2022"]
+  },
+  "include": ["src", "../shared"],
+  "exclude": ["node_modules", "../frontend", "../webkit", "../tests", "../benchmarks"]
+}

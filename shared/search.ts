@@ -1,5 +1,5 @@
-import { scoreGame } from './ranking';
-import type { SearchableGame, SearchResult } from './types';
+import { scoreGame } from './ranking.js';
+import type { SearchableGame, SearchResult } from './types.js';
 
 export function searchGames<T extends SearchableGame>(games: readonly T[], query: string, limit = 50): SearchResult<T>[] {
   if (limit <= 0) return [];

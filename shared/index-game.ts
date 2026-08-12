@@ -1,6 +1,6 @@
-import { normalizeSearchText } from './normalize';
-import { createPinyinFields } from './pinyin';
-import type { LibraryGameIndex, LibraryGameSource, StoreGameIndex } from './types';
+import { normalizeSearchText } from './normalize.js';
+import { createPinyinFields } from './pinyin.js';
+import type { LibraryGameIndex, LibraryGameSource, StoreGameIndex } from './types.js';
 
 export function indexLibraryGame(game: LibraryGameSource): LibraryGameIndex {
   return {

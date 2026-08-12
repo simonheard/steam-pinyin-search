@@ -17,6 +17,7 @@
     "server:sync": "tsx server/src/sync-cli.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^11.1.0",
     "fastify": "^5.5.0",
     "pinyin-pro": "3.28.2"
   },

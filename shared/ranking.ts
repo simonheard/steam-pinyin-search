@@ -1,5 +1,5 @@
-import { normalizeSearchText } from './normalize';
-import type { MatchField, SearchableGame } from './types';
+import { normalizeSearchText } from './normalize.js';
+import type { MatchField, SearchableGame } from './types.js';
 
 export interface ScoreDetails {
   score: number;
