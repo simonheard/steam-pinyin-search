@@ -1,0 +1,14 @@
+Millennium Installer
+--------------------
+Copyright Project Millennium contributors.
+Source: https://github.com/SteamClientHomebrew/Installer
+Release: https://github.com/SteamClientHomebrew/Installer/releases/tag/v1.12.1
+License: MIT
+
+The bundled MillenniumInstaller-Windows.exe is the unmodified, Authenticode-signed
+upstream release asset. Its expected SHA-256 is:
+1A3BAF49F20C321BDCC9421F5B7AAB8C1E8A33792C93086463D148B502C1BE3D
+
+The installer downloads Millennium runtime files from the official
+SteamClientHomebrew/Millennium GitHub releases and verifies their release digest.
+

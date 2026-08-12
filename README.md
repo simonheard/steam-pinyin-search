@@ -40,7 +40,7 @@ npm run build
 
 ## Install the plugin locally
 
-Build it, then link or copy this repository as a directory named `steam-pinyin-search` under the current Millennium plugin directory (`%STEAM%\plugins` in current Windows installations). The folder must contain `plugin.json` and `.millennium\Dist\index.js` / `webkit.js`.
+Build it, then link or copy this repository as a directory named `steam-pinyin-search` under the current Millennium v3.4 Windows plugin directory (`%STEAM%\millennium\plugins`). The folder must contain `plugin.json` and `.millennium\Dist\index.js` / `webkit.js`.
 
 For a self-contained archive:
 
@@ -49,6 +49,20 @@ npm run package:plugin
 ```
 
 Extract the resulting `artifacts\steam-pinyin-search-v0.1.0.zip` into the Millennium plugin directory. In Steam, open **Settings → Millennium → Plugins**, enable **Steam Pinyin Search**, and reload Steam. Enabled plugins load with Steam/Millennium; no separate client process is installed.
+
+## Windows novice bundle（裸 Steam 小白整合包）
+
+Users who have ordinary Windows Steam but no Millennium can use the novice bundle:
+
+```powershell
+npm run package:easy
+```
+
+This creates `artifacts\steam-pinyin-search-easy-install-v0.1.0.zip`. After fully extracting it, the user double-clicks `install.cmd`, approves the administrator prompt, and completes the visible official Millennium installer. The bootstrap then installs the plugin, adds it to `enabledPlugins`, and restarts Steam.
+
+The bundle does **not** modify or re-sign Millennium. It carries the unmodified SteamClientHomebrew Installer v1.12.1 release, verifies its published SHA-256 and valid SignPath Authenticode signature, and lets that official installer download the current stable runtime. This preserves upstream trust and update handling. It is therefore a network bootstrap bundle, not a frozen offline repack. The upstream installer and Millennium are MIT licensed; attribution and source URLs are included in `THIRD_PARTY_NOTICES.txt`.
+
+Current v3.4 runtime validation found that Steam exposes `SetSearchText` as a non-configurable read-only MobX action. The plugin first attempts the official method patch and then safely falls back to a capture listener on the original `.SearchInput` field. Steam's own search handler remains unchanged, and the fallback is cleaned up on route replacement/unload.
 
 ## Store API setup
 
@@ -112,4 +126,3 @@ Tests cover normalization, pinyin, initials, ranking, cache diffs, a 5,000-game 
 ## Privacy and failure behavior
 
 The Library index and cache are localStorage data inside Steam and are never sent to the API. A Store timeout, malformed response, selector failure, or server outage hides only the plugin dropdown. It does not prevent typing, native suggestions, Enter submission, or Steam navigation.
-
