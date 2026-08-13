@@ -15,7 +15,6 @@ services:
       STEAM_PINYIN_HOST: 0.0.0.0
       STEAM_PINYIN_PORT: 8787
       STEAM_PINYIN_DB: /data/catalog.sqlite
-      STEAM_PINYIN_ALIASES: "${STEAM_PINYIN_ALIASES:-/app/catalog/aliases.zh-CN.json}"
     volumes:
       - catalog-data:/data
 
@@ -26,6 +25,7 @@ services:
       STEAM_WEB_API_KEY: "${STEAM_WEB_API_KEY:-}"
       STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS: "${STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS:-false}"
       STEAM_PINYIN_DB: /data/catalog.sqlite
+      STEAM_PINYIN_ALIASES: "${STEAM_PINYIN_ALIASES:-/app/catalog/aliases.zh-CN.json}"
     volumes:
       - catalog-data:/data
     command: ["node", "dist/server/src/sync-cli.js"]
