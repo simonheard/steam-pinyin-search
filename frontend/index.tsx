@@ -1,10 +1,11 @@
-import { DialogBodyText, DialogButton, IconsModule, TextField, ToggleField, definePlugin, routerHook, usePluginConfig, useWindowRef } from '@steambrew/client';
+import { DialogBodyText, DialogButton, IconsModule, TextField, ToggleField, definePlugin, pluginConfig, routerHook, usePluginConfig, useWindowRef } from '@steambrew/client';
 import { useEffect, useState } from 'react';
 
 import { createLogger } from '../shared/logger';
 import { normalizeServerUrl, STORE_SEARCH_ENABLED_KEY, STORE_SERVER_URL_KEY } from '../shared/plugin-settings';
 import { buildLibraryIndex } from './library/indexer';
 import { LibrarySearchIndex } from './library/search';
+import { persistSettingWithReadback } from './settings-persistence';
 import { findLibrarySearchInput, installLibrarySearchInputHook } from './steam-integration/library-search-input';
 import { installLibrarySearchHook } from './steam-integration/library-search-hook';
 import { extractLibraryGames, waitForSteamGlobals } from './steam-integration/resolve';
@@ -109,7 +110,7 @@ function SettingsContent() {
   const saveServer = (): void => {
     try {
       const normalized = normalizeServerUrl(serverDraft) ?? '';
-      void setStoredServerUrl(normalized)
+      void persistSettingWithReadback(setStoredServerUrl, () => pluginConfig.get<string>(STORE_SERVER_URL_KEY), normalized)
         .then(() => {
           setServerDraft(normalized);
           setServerMessage(normalized ? 'Server saved. Reload Steam to apply it.' : 'Local mode saved. Reload Steam to apply it.');
@@ -132,7 +133,7 @@ function SettingsContent() {
         description="When disabled, the plugin does not inject Store search, keep local Store data, or send Store requests. Reload Steam after changing this option."
         checked={storeEnabled}
         onChange={(checked) => {
-          void setStoreEnabled(checked)
+          void persistSettingWithReadback(setStoreEnabled, () => pluginConfig.get<boolean>(STORE_SEARCH_ENABLED_KEY), checked)
             .then(() => setServerMessage('Setting saved. Reload Steam to apply it.'))
             .catch(() => setServerMessage('Could not save the Store switch. Check the Millennium logs.'));
         }}
