@@ -16,7 +16,7 @@
 ## 提交前仍需人工完成
 
 - [ ] 在 Steam Client Beta 上实际安装、启用、搜索并重载验证。
-- [ ] 确认 GitHub Actions 在公开仓库中全部通过。
+- [x] 确认 GitHub Actions 在仓库中全部通过（CI #2，2026-08-13）。
 - [ ] 为 v0.1.0 创建 GitHub Release，附上两个 ZIP 及 SHA-256。
 - [ ] 在 PluginDatabase PR 中等待独立第三方测试者勾选 Stable/Beta 验证框；作者
   不应自行勾选这两个第三方确认项。
