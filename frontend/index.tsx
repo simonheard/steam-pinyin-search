@@ -5,6 +5,7 @@ import { createLogger } from '../shared/logger';
 import { normalizeServerUrl, STORE_SEARCH_ENABLED_KEY, STORE_SERVER_URL_KEY } from '../shared/plugin-settings';
 import { buildLibraryIndex } from './library/indexer';
 import { LibrarySearchIndex } from './library/search';
+import { LibraryRemoteAliasSearchClient, type LibraryRemoteAliasSearch } from './library/remote-alias-search';
 import { persistSettingWithReadback } from './settings-persistence';
 import { findLibrarySearchInput, installLibrarySearchInputHook } from './steam-integration/library-search-input';
 import { installLibrarySearchHook } from './steam-integration/library-search-hook';
@@ -22,7 +23,7 @@ interface PluginRuntimeStatus {
 
 let runtimeStatus: PluginRuntimeStatus = { state: 'starting', message: 'Waiting for the Steam Library…' };
 let cleanupHandle: CleanupHandle | null = null;
-let bridgeRuntime: { store: SteamLibraryStoreLike; searchIndex: LibrarySearchIndex } | null = null;
+let bridgeRuntime: { store: SteamLibraryStoreLike; searchIndex: LibrarySearchIndex; remoteAliasSearch?: LibraryRemoteAliasSearch } | null = null;
 const bridgeRefreshListeners = new Set<() => void>();
 
 function setBridgeRuntime(runtime: typeof bridgeRuntime): void {
@@ -46,7 +47,7 @@ function LibraryInputBridge() {
       const input = findLibrarySearchInput(ownerWindow.document);
       if (!input) return;
       activeInput = input;
-      inputHandle = installLibrarySearchInputHook(input, bridgeRuntime.store, bridgeRuntime.searchIndex, logger);
+      inputHandle = installLibrarySearchInputHook(input, bridgeRuntime.store, bridgeRuntime.searchIndex, logger, bridgeRuntime.remoteAliasSearch);
     };
     bridgeRefreshListeners.add(refresh);
     const observer = new MutationObserver(refresh);
@@ -75,12 +76,22 @@ async function startLibraryIntegration(): Promise<void> {
     logger.info('library detected', { games: sources.length });
     const build = buildLibraryIndex(sources, localStorage, PLUGIN_VERSION, logger);
     const searchIndex = new LibrarySearchIndex(build.games);
+    let remoteAliasSearch: LibraryRemoteAliasSearch | undefined;
+    try {
+      const remoteServer = normalizeServerUrl(await pluginConfig.get<string>(STORE_SERVER_URL_KEY));
+      if (remoteServer) {
+        remoteAliasSearch = new LibraryRemoteAliasSearchClient(remoteServer, new Set(sources.map((game) => game.appId)), logger);
+        logger.info('library online alias search enabled');
+      }
+    } catch (error) {
+      logger.warn('library online alias search unavailable', error);
+    }
     let integrationMode = 'original search patch';
     try {
-      cleanupHandle = installLibrarySearchHook(steam.libraryStore, searchIndex, logger);
+      cleanupHandle = installLibrarySearchHook(steam.libraryStore, searchIndex, logger, remoteAliasSearch);
     } catch (error) {
       integrationMode = 'original input fallback';
-      setBridgeRuntime({ store: steam.libraryStore, searchIndex });
+      setBridgeRuntime({ store: steam.libraryStore, searchIndex, ...(remoteAliasSearch ? { remoteAliasSearch } : {}) });
       logger.warn('library method patch unavailable; using input fallback', error);
     }
     runtimeStatus = {
@@ -113,7 +124,7 @@ function SettingsContent() {
       void persistSettingWithReadback(setStoredServerUrl, () => pluginConfig.get<string>(STORE_SERVER_URL_KEY), normalized)
         .then(() => {
           setServerDraft(normalized);
-          setServerMessage(normalized ? 'Server saved. Reload Steam to apply it.' : 'Local mode saved. Reload Steam to apply it.');
+          setServerMessage(normalized ? 'Online search server saved. Reload Steam to apply it.' : 'Local-only mode saved. Reload Steam to apply it.');
         })
         .catch(() => setServerMessage('Could not save the server setting. Check the Millennium logs.'));
     } catch (error) {
@@ -126,7 +137,7 @@ function SettingsContent() {
       <DialogBodyText>
         <strong>Library:</strong> {status.message}
         <br />
-        <strong>Privacy:</strong> Library names never leave this device. Store search is local unless you configure a server; remote mode sends only the typed query.
+        <strong>Privacy:</strong> Library names never leave this device. With a server configured, Store and Library alias search send only the typed query; Library results are intersected with owned AppIDs locally.
       </DialogBodyText>
       <ToggleField
         label="Enable Store pinyin search"
@@ -139,16 +150,15 @@ function SettingsContent() {
         }}
       />
       <TextField
-        label="Store search server (optional)"
-        description="Leave empty for local-only mode. Use an HTTPS URL for a remotely hosted server."
-        disabled={!storeEnabled}
+        label="Online search server (optional)"
+        description="Enables Store search and Library community aliases. Only the typed query is sent; your Library list is never uploaded."
         value={serverDraft}
         onChange={(event) => {
           setServerDraft(event.currentTarget.value);
           setServerMessage('');
         }}
       />
-      <DialogButton disabled={!storeEnabled} onClick={saveServer}>Save Store settings</DialogButton>
+      <DialogButton onClick={saveServer}>Save online settings</DialogButton>
       {serverMessage ? <DialogBodyText>{serverMessage}</DialogBodyText> : null}
     </div>
   );

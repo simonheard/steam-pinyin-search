@@ -5,7 +5,7 @@ import { MemoryCatalogRepository } from '../server/src/catalog/memory-repository
 import type { CatalogDetailsAdapter, CatalogSource } from '../server/src/catalog/types';
 import { syncCatalog } from '../server/src/catalog/sync';
 import { SteamStoreServiceCatalogSource } from '../server/src/catalog/steam-store-service';
-import { applyAliasDataset } from '../server/src/catalog/curated-aliases';
+import { applyAliasDataset, loadAliasDataset } from '../server/src/catalog/curated-aliases';
 import { syncPicsLocalizedNames, type PicsClient } from '../server/src/catalog/pics-localized-sync';
 import { syncWikidataAliases } from '../server/src/catalog/wikidata-alias-sync';
 
@@ -55,6 +55,26 @@ describe('store search API', () => {
     const app = await testServer();
     const response = await app.inject({ method: 'GET', url: '/api/search?q=soundtrack' });
     expect(response.json().results).toEqual([]);
+  });
+
+  it('allows the Steam Library loopback origin', async () => {
+    const app = await testServer();
+    const response = await app.inject({ method: 'GET', url: '/health', headers: { origin: 'https://steamloopback.host' } });
+    expect(response.headers['access-control-allow-origin']).toBe('https://steamloopback.host');
+  });
+
+  it('searches reviewed community aliases and their pinyin', async () => {
+    const repository = new MemoryCatalogRepository([
+      { appId: 1172470, name: 'Apex Legends', type: 'game', aliases: [] },
+      { appId: 230410, name: 'Warframe', type: 'game', aliases: [] },
+      { appId: 728880, name: 'Overcooked! 2', type: 'game', aliases: [] },
+    ]);
+    applyAliasDataset(repository, await loadAliasDataset('./catalog/aliases.zh-CN.json'));
+    const app = await buildServer(repository);
+    openApps.push(app);
+    expect((await app.inject({ method: 'GET', url: '/api/search?q=paipai' })).json().results[0].appid).toBe(1172470);
+    expect((await app.inject({ method: 'GET', url: '/api/search?q=xingjicangshu' })).json().results[0].appid).toBe(230410);
+    expect((await app.inject({ method: 'GET', url: '/api/search?q=fenshouchufang2' })).json().results[0].appid).toBe(728880);
   });
 });
 

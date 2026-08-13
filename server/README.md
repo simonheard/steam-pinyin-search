@@ -119,7 +119,7 @@ The API container may run without a Web API key when `STEAM_PINYIN_SYNC_ON_START
 
 ## Chinese aliases
 
-`catalog/aliases.zh-CN.json` is a deliberately small, reviewable CC0 overlay keyed by Steam AppID. It supplies popular Chinese display names and unambiguous community aliases such as `老头环`, `黑猴`, and `大表哥2`. Alias text is also converted to full pinyin and initials, so `laotouhuan` and `lth` can match `ELDEN RING`.
+`catalog/aliases.zh-CN.json` is a deliberately reviewable CC0 overlay keyed by Steam AppID. It supplies popular Chinese display names and unambiguous community aliases such as `老头环`, `黑猴`, `大表哥2`, `派派`, `星际仓鼠`, `分手厨房2`, `骑砍2`, and `钢4`. Alias text is also converted to full pinyin and initials, so `laotouhuan`/`lth`, `paipai`, and `fenshouchufang2` work without reverse-guessing Chinese characters.
 
 Contributions should include the exact Steam AppID and avoid generic words that would create noisy matches. The overlay is merged with existing aliases and never creates catalog rows for unknown AppIDs.
 

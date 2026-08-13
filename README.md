@@ -16,7 +16,7 @@ The plugin contains no native binary and has no Millennium Python backend (`useB
 
 ## Current scope
 
-- Library: patches Steam's existing `SetSearchText` flow and adds matching AppIDs through `SetSearchSuggestions`.
+- Library: patches Steam's existing `SetSearchText` flow and adds local pinyin matches through `SetSearchSuggestions`; when an online server is configured it also resolves community aliases remotely, then intersects results with locally owned AppIDs.
 - Local index: original/normalized name, phrase-aware pinyin, compact pinyin, initials, aliases, schema-versioned cache, and AppID/name diffing.
 - Store: local-by-default catalog, optional user-configured remote server, automatic local learning/fallback, 200 ms debounce, minimum two characters, 1.5 second timeout, cancellation, 50-query LRU, separate dropdown, and unchanged native Enter behavior.
 - API: Fastify + SQLite + in-memory search index; official `IStoreService/GetAppList` synchronization; game-only results by default.
@@ -112,13 +112,13 @@ npm run server
 
 For production, run `npm run build:server`, then start `node dist/server/src/cli.js`; schedule `node dist/server/src/sync-cli.js` separately. The sync cursor advances only after a successful page set. Rebuild the process after synchronization so the RAM index reloads. Put HTTPS and ordinary rate limiting in a reverse proxy when exposing the API publicly.
 
-Store mode defaults to local and makes no plugin API request. Successful remote results are retained in the local pinyin catalog (up to 10,000 games), so they remain searchable after the server is removed or unavailable.
+Store mode defaults to local and makes no plugin API request. Successful remote Store results are retained in the local pinyin catalog (up to 10,000 games), so they remain searchable after the server is removed or unavailable. When a server is configured, Library alias search also uses it: only the typed query is sent, and returned AppIDs are intersected with the Library entirely on-device. The game list, SteamID, and account data are never sent.
 
 Configure it through **Steam → Settings → Millennium → Plugins → Steam Pinyin Search**:
 
 - **Enable Store pinyin search** is the master switch. Disable it and reload Steam to skip Store injection and delete the plugin's local Store catalog.
 - Leave **Store search server** empty for local-only mode.
-- Enter the self-hosted HTTPS base URL for remote-first search with automatic local fallback.
+- Enter the self-hosted HTTPS base URL for remote-first Store search and online Library community aliases. Store failures fall back locally; Library failures leave the original local search untouched.
 - Save, then reload Steam to apply the settings across Store WebKit views.
 
 The Store DevTools API remains available for diagnostics and catalog management:
@@ -173,4 +173,4 @@ Tests cover normalization, pinyin, initials, ranking, cache diffs, a 5,000-game 
 
 ## Privacy and failure behavior
 
-The Library index and cache are localStorage data inside Steam and are never sent to the API. A Store timeout, malformed response, selector failure, or server outage hides only the plugin dropdown. It does not prevent typing, native suggestions, Enter submission, or Steam navigation.
+The Library index and cache are localStorage data inside Steam and are never sent to the API. Online Library alias lookup sends only the normalized query, requests at most 50 public results, and filters those results against owned AppIDs locally. A timeout, malformed response, selector failure, or server outage leaves local Library search and native Steam behavior intact.

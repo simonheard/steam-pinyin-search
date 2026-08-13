@@ -59,4 +59,22 @@ describe('Library search hook', () => {
     store.SetSearchText('hshwk');
     expect(setSuggestions).toHaveBeenCalledTimes(1);
   });
+
+  it('unions remote alias matches with local matches without uploading the Library', async () => {
+    const setSuggestions = vi.fn();
+    const store = {
+      currentAppFilter: { searchText: '', SetSearchSuggestions: setSuggestions },
+      SetSearchText: vi.fn(),
+    } satisfies SteamLibraryStoreLike;
+    const index = new LibrarySearchIndex([indexLibraryGame({ appId: 1, name: 'Local Game' })]);
+    const remote = { search: vi.fn(async () => [2]), cancel: vi.fn() };
+    const handle = installLibrarySearchHook(store, index, logger, remote);
+
+    store.SetSearchText('老头环');
+    await vi.waitFor(() => expect(setSuggestions).toHaveBeenLastCalledWith(new Set([2])));
+    expect(remote.search).toHaveBeenCalledWith('老头环');
+
+    handle.cleanup();
+    expect(remote.cancel).toHaveBeenCalled();
+  });
 });

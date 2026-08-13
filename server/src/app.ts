@@ -12,7 +12,7 @@ export interface ServerOptions {
 
 export async function buildServer(repository: CatalogRepository, options: ServerOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger: options.logger ?? false, requestTimeout: 2_000 });
-  const allowedOrigins = new Set(options.allowedOrigins ?? ['https://store.steampowered.com']);
+  const allowedOrigins = new Set(options.allowedOrigins ?? ['https://store.steampowered.com', 'https://steamloopback.host']);
   await app.register(cors, {
     credentials: false,
     origin(origin, callback) {

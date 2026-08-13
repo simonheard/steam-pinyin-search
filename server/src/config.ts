@@ -18,7 +18,7 @@ export function readServerConfig(environment: NodeJS.ProcessEnv = process.env): 
     databasePath: resolve(environment.STEAM_PINYIN_DB ?? './server/data/catalog.sqlite'),
     host: environment.STEAM_PINYIN_HOST ?? '127.0.0.1',
     port,
-    allowedOrigins: (environment.STEAM_PINYIN_ALLOWED_ORIGINS ?? 'https://store.steampowered.com')
+    allowedOrigins: (environment.STEAM_PINYIN_ALLOWED_ORIGINS ?? 'https://store.steampowered.com,https://steamloopback.host')
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean),

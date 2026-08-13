@@ -8,7 +8,7 @@ services:
       - "${STEAM_PINYIN_BIND_ADDRESS:-127.0.0.1}:${STEAM_PINYIN_PUBLIC_PORT:-8787}:8787"
     environment:
       STEAM_WEB_API_KEY: "${STEAM_WEB_API_KEY:-}"
-      STEAM_PINYIN_ALLOWED_ORIGINS: "${STEAM_PINYIN_ALLOWED_ORIGINS:-https://store.steampowered.com,https://checkout.steampowered.com}"
+      STEAM_PINYIN_ALLOWED_ORIGINS: "${STEAM_PINYIN_ALLOWED_ORIGINS:-https://store.steampowered.com,https://checkout.steampowered.com,https://steamloopback.host}"
       STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS: "${STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS:-false}"
       STEAM_PINYIN_SYNC_ON_START: "${STEAM_PINYIN_SYNC_ON_START:-true}"
       STEAM_PINYIN_ALIASES: "${STEAM_PINYIN_ALIASES:-/app/catalog/aliases.zh-CN.json}"

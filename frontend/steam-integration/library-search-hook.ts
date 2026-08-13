@@ -3,6 +3,7 @@ import { afterPatch } from '@steambrew/client';
 import { normalizeSearchText } from '../../shared/normalize';
 import type { Logger } from '../../shared/logger';
 import type { LibrarySearchIndex } from '../library/search';
+import type { LibraryRemoteAliasSearch } from '../library/remote-alias-search';
 import type { CleanupHandle, SteamLibraryStoreLike } from './types';
 
 type SearchTextMethod = SteamLibraryStoreLike['SetSearchText'];
@@ -45,6 +46,7 @@ export function installLibrarySearchHook(
   store: SteamLibraryStoreLike,
   searchIndex: LibrarySearchIndex,
   logger: Logger,
+  remoteAliasSearch?: LibraryRemoteAliasSearch,
 ): CleanupHandle {
   const existing = activeHooks.get(store);
   if (existing) {
@@ -53,6 +55,7 @@ export function installLibrarySearchHook(
   }
 
   const prepared = preparePatchTarget(store);
+  let searchGeneration = 0;
   const patch = afterPatch(prepared.target, 'SetSearchText', function (this: SteamLibraryStoreLike, [query], result) {
     const currentStore = this as SteamLibraryStoreLike;
     const normalized = normalizeSearchText(query);
@@ -60,6 +63,16 @@ export function installLibrarySearchHook(
       const appIds = searchIndex.search(normalized, searchIndex.size).map(({ item }) => item.appId);
       currentStore.currentAppFilter.SetSearchSuggestions(new Set(appIds));
       logger.debug('library pinyin matches applied', { query: normalized, matches: appIds.length });
+      const generation = ++searchGeneration;
+      void remoteAliasSearch?.search(normalized).then((remoteAppIds) => {
+        if (generation !== searchGeneration) return;
+        currentStore.currentAppFilter.SetSearchSuggestions(new Set([...appIds, ...remoteAppIds]));
+      }).catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) logger.debug('library remote alias search failed', error);
+      });
+    } else {
+      searchGeneration += 1;
+      remoteAliasSearch?.cancel();
     }
     return result;
   });
@@ -72,6 +85,7 @@ export function installLibrarySearchHook(
       if (cleaned) return;
       cleaned = true;
       if (!patch.hasUnpatched) patch.unpatch();
+      remoteAliasSearch?.cancel();
       prepared.restoreDescriptor();
       activeHooks.delete(store);
       logger.debug('library search hook removed');
