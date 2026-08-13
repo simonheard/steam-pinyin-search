@@ -66,12 +66,12 @@ describe('Library search hook', () => {
       currentAppFilter: { searchText: '', SetSearchSuggestions: setSuggestions },
       SetSearchText: vi.fn(),
     } satisfies SteamLibraryStoreLike;
-    const index = new LibrarySearchIndex([indexLibraryGame({ appId: 1, name: 'Local Game' })]);
+    const index = new LibrarySearchIndex([indexLibraryGame({ appId: 1, name: '老头环攻略' })]);
     const remote = { search: vi.fn(async () => [2]), cancel: vi.fn() };
     const handle = installLibrarySearchHook(store, index, logger, remote);
 
     store.SetSearchText('老头环');
-    await vi.waitFor(() => expect(setSuggestions).toHaveBeenLastCalledWith(new Set([2])));
+    await vi.waitFor(() => expect(setSuggestions).toHaveBeenLastCalledWith(new Set([1, 2])));
     expect(remote.search).toHaveBeenCalledWith('老头环');
 
     handle.cleanup();
