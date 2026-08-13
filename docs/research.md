@@ -169,6 +169,8 @@ The adopted enrichment layers are:
 
 Production validation on 2026-08-12 completed a checkpointed scan of all **178,865** catalog games on `simon-vps` and stored **15,978** official Simplified Chinese titles. The worker limits each Steam connection to 40,000 apps and restarts from its durable checkpoint to bound `steam-user` memory retention. The API was then reloaded and verified with full-pinyin and initials queries including `guaiwulieren`/`gwlr` and `zhilang`.
 
+The production Wikidata pass projected only P1733-linked entities with `zh-cn`, `zh-hans`, or `zh` labels/aliases. It found 5,129 entities, matched 4,532 catalog games, and added community metadata to 3,009 records. After removing non-Chinese language-fallback pollution from an aborted prototype, the final database contains **18,912 Chinese-titled games**, **2,583 games with aliases**, and **3,961 aliases**. Queries such as `shangguzhihuan` now resolve through a community alias while the Steam/PICS localized title remains authoritative.
+
 Unofficial Xiaoheihe/HeyBox endpoints and scraped game sites are not enabled: no current stable public API contract or redistribution license was found. A source without an explicit reuse contract must be treated as opt-in experimental, never as the default catalog dependency.
 
 ## Pinyin library choice
@@ -253,3 +255,9 @@ Node/TypeScript was selected over FastAPI so normalization, pinyin conversion, r
 
 - pinyin-pro source: https://github.com/zh-lx/pinyin-pro
 - npm package: https://www.npmjs.com/package/pinyin-pro
+
+### Community metadata
+
+- Wikidata data access: https://www.wikidata.org/wiki/Wikidata:Data_access
+- Wikidata licensing (CC0 structured data): https://www.wikidata.org/wiki/Wikidata:Licensing
+- Steam AppID property P1733: https://www.wikidata.org/wiki/Property:P1733

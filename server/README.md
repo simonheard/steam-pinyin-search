@@ -92,6 +92,8 @@ curl http://127.0.0.1:8787/health
 
 Optional monthly systemd units are included as `deploy/systemd/steam-pinyin-search-wikidata.*`. Wikidata structured data is CC0; attribution is still included in the project documentation as a courtesy.
 
+On the 2026-08-12 production catalog, the combined Steam PICS + Wikidata + reviewed overlay pipeline produced 18,912 Chinese-titled games and 3,961 aliases. Counts will change as Steam and Wikidata change.
+
 ## Update the application
 
 ```bash
