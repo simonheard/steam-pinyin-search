@@ -167,6 +167,8 @@ The adopted enrichment layers are:
 4. Wikidata is the preferred future broad community layer: structured data is CC0, Steam AppID is property P1733, and Chinese labels/aliases can be joined without guessing identities. Its coverage is strongest for notable games, not the entire Steam catalog, so it complements rather than replaces Steam data.
 5. SteamKit/PICS is the broad Steam-native app metadata source. An anonymous `node-steam-user` 5.3.0 probe on 2026-08-12 returned `common.name_localized.schinese` for AppID 2358720 without account credentials. A 500-game batch returned 499 public records, 11 Simplified Chinese localized titles, and one unknown AppID in 1.355 seconds. The production worker therefore uses anonymous public-only PICS batches, durable AppID checkpoints, and a separate no-port one-shot container; it is not bundled into the public API runtime image.
 
+Production validation on 2026-08-12 completed a checkpointed scan of all **178,865** catalog games on `simon-vps` and stored **15,978** official Simplified Chinese titles. The worker limits each Steam connection to 40,000 apps and restarts from its durable checkpoint to bound `steam-user` memory retention. The API was then reloaded and verified with full-pinyin and initials queries including `guaiwulieren`/`gwlr` and `zhilang`.
+
 Unofficial Xiaoheihe/HeyBox endpoints and scraped game sites are not enabled: no current stable public API contract or redistribution license was found. A source without an explicit reuse contract must be treated as opt-in experimental, never as the default catalog dependency.
 
 ## Pinyin library choice
@@ -218,7 +220,7 @@ Node/TypeScript was selected over FastAPI so normalization, pinyin conversion, r
 2. **Store DOM:** the global search markup can change independently from the client. All selectors live in one adapter with semantic-first fallbacks.
 3. **Localized catalog gap:** Valve does not document a bulk localized-title projection. The optional app-details endpoint is unofficial and must remain isolated, cached, rate-limited, and replaceable.
 4. **CORS:** a deployed API must explicitly allow the Steam Store origins used by the desktop browser while avoiding `*` if credentials are ever added (the MVP sends no credentials).
-5. **No local Millennium installation:** compilation and automated tests can run here, but actual Steam injection/log verification requires installing Millennium 3.4.0 and enabling the built plugin.
+5. **Runtime validation scope:** Millennium 3.4.0 is installed locally and the plugin loads, indexes the user's Library, and displays its settings page. Steam UI hooks remain coupled to Valve internals and require rechecking after client updates.
 6. **Very recent framework release:** v3.4.0 became stable on 2026-08-10. Minor SDK/template inconsistencies are possible; package versions are pinned and CI should detect drift.
 7. **Multi-pronunciation:** default phrase pronunciation is deliberately used for the MVP. Variant expansion is represented in the schema but not enabled broadly due to index growth and ranking noise.
 8. **Documentation path mismatch:** the filesystem reference says `%STEAM%/plugin` and quick start says `%STEAM%/plugins`, while the signed v3.4.0 runtime uses `%STEAM%/millennium/plugins`. Packaging follows the verified runtime.
