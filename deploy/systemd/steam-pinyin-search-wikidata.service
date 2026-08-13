@@ -9,3 +9,5 @@ Type=oneshot
 WorkingDirectory=/opt/steam-pinyin-search
 ExecStart=/usr/bin/flock --nonblock /run/steam-pinyin-search-wikidata.lock /usr/bin/docker compose --profile tools run --rm wikidata
 ExecStartPost=/usr/bin/curl --fail --silent --show-error http://127.0.0.1:8787/health
+Restart=on-failure
+RestartSec=5min

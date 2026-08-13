@@ -83,7 +83,7 @@ Optional weekly systemd units are included as `deploy/systemd/steam-pinyin-searc
 
 ## CC0 community names and aliases
 
-The Wikidata worker joins public Wikidata items to the catalog by Steam AppID (P1733), then imports Simplified Chinese labels and aliases. A Steam/PICS localized title always wins; Wikidata can fill a missing title and adds alternate names. The worker uses only the official SPARQL and Wikibase APIs, identifies itself with a User-Agent, retries transient failures, processes entities in batches of 50, and reapplies the reviewed local alias overlay last.
+The Wikidata worker joins public Wikidata items to the catalog by Steam AppID (P1733), then imports Simplified Chinese labels and aliases. A Steam/PICS localized title always wins; Wikidata can fill a missing title and adds alternate names. The worker uses only the official SPARQL and Wikibase APIs, identifies itself with a User-Agent, honors rate limits with exponential backoff, processes entities serially in batches of 50, saves a durable entity checkpoint, and reapplies the reviewed local alias overlay last.
 
 ```bash
 docker compose --profile tools run --rm wikidata
