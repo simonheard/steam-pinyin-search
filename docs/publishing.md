@@ -24,7 +24,7 @@ The default plugin path is:
 ~/.local/share/millennium/plugins
 ```
 
-Steam Pinyin Search has no native plugin binary and no Python backend, so the same production JavaScript bundle is intended to be used. Linux build and actual Steam/Millennium runtime validation have not yet been completed. Mark Linux support as beta until both tests are complete.
+Steam Pinyin Search has not been run or validated on Linux. The absence of a native plugin binary does not prove compatibility with Steam's Linux UI internals. Linux is explicitly **untested**, not supported or beta-tested, until real runtime validation is completed.
 
 ### macOS
 
@@ -34,7 +34,7 @@ Millennium's current public repository includes an experimental macOS wrapper an
 ~/Library/Application Support/Millennium/plugins
 ```
 
-Upstream also states in its current locale/runtime messages that automatic Millennium updates are not yet available on macOS. Steam Pinyin Search has not yet been runtime-tested on macOS; macOS support remains experimental and no novice bundle is published.
+Upstream also states in its current locale/runtime messages that automatic Millennium updates are not yet available on macOS. Steam Pinyin Search has not been run or validated on macOS. macOS is explicitly **untested**, not supported or beta-tested, and no novice bundle is published.
 
 ## Manual ZIP distribution
 

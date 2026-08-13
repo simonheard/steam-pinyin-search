@@ -24,3 +24,13 @@ Validation date: 2026-08-12. Steam desktop build `1785799196`, Simplified Chines
 
 The runtime check confirms loading and hook mounting. Automated search/ranking coverage remains responsible for exact result sets; a public release should still be checked after every Steam/Millennium update.
 
+## Steam Client Beta attempt
+
+Validation date: 2026-08-13.
+
+- Steam's active Beta manifest was confirmed from the official update host as `steam_client_publicbeta_win64`; the selected channel name is `publicbeta`.
+- Steam publicbeta build `1786491548` downloaded and installed successfully.
+- Millennium v3.4.0 crashed during each of three startup attempts before the plugin frontend could load.
+- All three Millennium crash reports identify `millennium.dll` and `EXCEPTION_ACCESS_VIOLATION (0xC0000005)`.
+- Because the loader failed before plugin startup, this is not a passed or failed plugin UI test. Steam Beta compatibility remains blocked and unverified until Millennium supports this client build.
+- The `publicbeta` marker was removed, Steam Stable build `1785799196` was restored, and the plugin again logged `plugin loaded`, `library detected`, and `store hook mounted`.

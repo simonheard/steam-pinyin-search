@@ -27,5 +27,7 @@ D29A928A174CF3242FA564E021DE604D0992FF582440FFD2E3810478EDFF5A38  steam-pinyin-s
 - lint、TypeScript strict typecheck、61 个测试、生产构建、npm audit。
 - Node 22 + pnpm 11 与 Node 20 + pnpm 10 隔离生产构建。
 
-Linux、macOS 和 Steam Beta 的 Steam UI 实机验证仍待完成；详情见
+Linux 与 macOS 明确为未经测试。Steam publicbeta build `1786491548` 已尝试，但
+Millennium 3.4.0 在插件前端加载前发生 `EXCEPTION_ACCESS_VIOLATION`，因此本插件的
+Steam Beta 兼容性被上游 loader 阻塞，仍未验证。详情见
 [submission-checklist.md](submission-checklist.md)。

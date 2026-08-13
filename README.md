@@ -11,10 +11,12 @@ Library data stays on the user's machine. Store search makes no plugin network r
 | Platform | Millennium status | This plugin |
 | --- | --- | --- |
 | Windows 10/11, x64 | Officially supported | Runtime-validated with Millennium 3.4.0 and Steam Stable; novice bundle available. |
-| Native Linux Steam, x86/x86_64 | Officially supported | The frontend-only plugin is designed to be portable, but Linux build and Steam runtime validation are still pending. Flatpak Steam, Snap Steam, and ARM distributions are not supported by Millennium. |
-| macOS | Millennium upstream provides an experimental wrapper/install path | Treat both Millennium and this plugin as experimental on macOS; Steam runtime validation is still pending, automatic Millennium updates are limited, and no novice bundle is provided. |
+| Native Linux Steam, x86/x86_64 | Officially supported | **Untested:** this plugin has not been run or validated on Linux. Flatpak Steam, Snap Steam, and ARM distributions are not supported by Millennium. |
+| macOS | Millennium upstream provides an experimental wrapper/install path | **Untested:** this plugin has not been run or validated on macOS. Millennium's macOS support is experimental, automatic updates are limited, and no novice bundle is provided. |
 
-The plugin contains no native binary and has no Millennium Python backend (`useBackend: false`), so its packaged JavaScript is platform-neutral. That does not guarantee that Steam's internal Library hooks are identical on every OS; the native search remains untouched if discovery fails. See [docs/publishing.md](docs/publishing.md) for platform paths and the official publication workflow.
+The plugin contains no native binary and has no Millennium Python backend (`useBackend: false`), but that does **not** constitute Linux or macOS compatibility testing. Steam's internal Library hooks may differ by OS; the native search remains untouched if discovery fails. See [docs/publishing.md](docs/publishing.md) for platform paths and the official publication workflow.
+
+Steam `publicbeta` build `1786491548` was also attempted on Windows on 2026-08-13. Millennium 3.4.0 crashed in `millennium.dll` with `EXCEPTION_ACCESS_VIOLATION` before plugin frontend startup, so Steam Beta compatibility is currently **blocked by the upstream loader and remains unverified for this plugin**. Steam Stable was restored successfully.
 
 ## Current scope
 

@@ -28,10 +28,14 @@
 最终路径里应直接看到 `plugin.json` 和 `.millennium/Dist/`，不要多套一层同名
 文件夹。随后在 Millennium 设置里启用插件并重新加载 Steam。
 
-Windows 已用 Steam Stable 与 Millennium 3.4.0 实机验证。Linux 和 macOS 的
-插件包不含原生二进制，理论上共用同一份 JavaScript；但这两个平台尚未完成
-Steam 内部 UI hook 的实机验证。Millennium 对 macOS 的支持仍标记为实验性；
+Windows 已用 Steam Stable 与 Millennium 3.4.0 实机验证。**Linux 和 macOS
+均未经测试，不声明兼容或可用。** 插件包虽然不含原生二进制，但 Steam 内部 UI
+hook 可能因操作系统而不同。Millennium 对 macOS 的支持仍标记为实验性；
 Flatpak Steam、Snap Steam 和 ARM Linux 不在 Millennium 当前支持范围内。
+
+Steam Beta 也暂不声明兼容：2026-08-13 的 `publicbeta` build `1786491548`
+会使 Millennium 3.4.0 在插件加载前崩溃；这是上游 loader 阻塞，详见
+[`runtime-validation.md`](runtime-validation.md)。请使用 Steam Stable。
 
 ## 方式三：Windows 裸 Steam 小白包
 
