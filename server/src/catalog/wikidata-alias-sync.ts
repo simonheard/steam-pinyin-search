@@ -60,7 +60,7 @@ async function loadSteamMappings(fetchImpl: typeof fetch): Promise<Map<string, n
   const mappings = new Map<string, number[]>();
   const pageSize = 5_000;
   for (let offset = 0; ; offset += pageSize) {
-    const query = `SELECT ?item ?appid WHERE { ?item wdt:P1733 ?appid. } LIMIT ${pageSize} OFFSET ${offset}`;
+    const query = `SELECT ?item ?appid WHERE { ?item wdt:P1733 ?appid. } ORDER BY ?item ?appid LIMIT ${pageSize} OFFSET ${offset}`;
     const url = new URL(WDQS_ENDPOINT);
     url.searchParams.set('format', 'json');
     url.searchParams.set('query', query);
