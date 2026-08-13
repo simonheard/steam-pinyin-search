@@ -6,6 +6,7 @@ import type { CatalogDetailsAdapter, CatalogSource } from '../server/src/catalog
 import { syncCatalog } from '../server/src/catalog/sync';
 import { SteamStoreServiceCatalogSource } from '../server/src/catalog/steam-store-service';
 import { applyAliasDataset } from '../server/src/catalog/curated-aliases';
+import { syncPicsLocalizedNames, type PicsClient } from '../server/src/catalog/pics-localized-sync';
 
 const openApps: Array<ReturnType<typeof buildServer> extends Promise<infer T> ? T : never> = [];
 
@@ -57,6 +58,29 @@ describe('store search API', () => {
 });
 
 describe('catalog sync', () => {
+  it('imports Simplified Chinese names from PICS in resumable batches', async () => {
+    const repository = new MemoryCatalogRepository([
+      { appId: 1, name: 'One', type: 'game', aliases: [], lastModified: 10 },
+      { appId: 2, name: 'Two', type: 'game', aliases: [], lastModified: 11 },
+      { appId: 3, name: 'Three', type: 'game', aliases: [], lastModified: 12 },
+    ]);
+    const requested: number[][] = [];
+    const client: PicsClient = {
+      async connect() {},
+      async getSimplifiedChineseNames(appIds) {
+        requested.push([...appIds]);
+        return new Map(appIds.map((appId) => [appId, `中文${appId}`]));
+      },
+      close() {},
+    };
+    const result = await syncPicsLocalizedNames(repository, { batchSize: 2, full: true }, client);
+    expect(requested).toEqual([[1, 2], [3]]);
+    expect(result).toMatchObject({ candidates: 3, scanned: 3, localized: 3, changed: 3 });
+    expect(repository.getApp(2)?.localizedName).toBe('中文2');
+    expect(repository.getState('catalog.pics_checkpoint_appid')).toBe('0');
+    expect(repository.getState('catalog.pics_last_successful_sync')).not.toBeNull();
+  });
+
   it('merges curated names and aliases without creating missing catalog rows', () => {
     const repository = new MemoryCatalogRepository([{ appId: 1245620, name: 'ELDEN RING', type: 'game', aliases: ['ER'] }]);
     const result = applyAliasDataset(repository, {

@@ -9,6 +9,18 @@ COPY shared ./shared
 COPY server ./server
 RUN npm run build:server
 
+FROM build AS pics
+
+ENV NODE_ENV=production \
+    STEAM_PINYIN_DB=/data/catalog.sqlite \
+    STEAM_PINYIN_ALIASES=/app/catalog/aliases.zh-CN.json
+
+COPY catalog ./catalog
+RUN mkdir -p /data && chown -R node:node /app /data
+USER node
+VOLUME ["/data"]
+CMD ["node", "dist/server/src/pics-sync-cli.js"]
+
 FROM node:22-bookworm-slim AS runtime
 
 ENV NODE_ENV=production \

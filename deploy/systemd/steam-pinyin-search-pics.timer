@@ -1,0 +1,12 @@
+[Unit]
+Description=Weekly Steam PICS localized-name synchronization
+
+[Timer]
+OnCalendar=Sun *-*-* 05:30:00 UTC
+RandomizedDelaySec=45m
+Persistent=true
+Unit=steam-pinyin-search-pics.service
+
+[Install]
+WantedBy=timers.target
+

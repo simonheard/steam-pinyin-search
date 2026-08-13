@@ -17,7 +17,8 @@
     "package:plugin": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-plugin.ps1",
     "package:easy": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-easy-install.ps1",
     "server": "tsx server/src/cli.ts",
-    "server:sync": "tsx server/src/sync-cli.ts"
+    "server:sync": "tsx server/src/sync-cli.ts",
+    "server:sync:pics": "tsx server/src/pics-sync-cli.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
@@ -33,8 +34,10 @@
     "@types/node": "^22.17.0",
     "@types/react": "19.1.1",
     "@types/react-dom": "19.1.1",
+    "@types/steam-user": "^5.1.1",
     "eslint": "^10.8.1",
     "globals": "^17.11.0",
+    "steam-user": "^5.3.0",
     "tsx": "^4.20.3",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.67.0",

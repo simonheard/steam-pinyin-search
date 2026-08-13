@@ -61,6 +61,26 @@ sudo systemctl enable --now steam-pinyin-search-sync.timer
 
 The timer runs daily with a randomized delay, prevents overlapping syncs, and refreshes the API's in-memory index afterward.
 
+## Steam-native Chinese title enrichment
+
+The isolated `pics` worker logs on anonymously to Steam and requests public PICS AppInfo in batches. It reads `common.name_localized.schinese`, checkpoints after every batch, updates only changed names, and can resume after interruption. It exposes no port, receives no user credentials, and is not part of the public API runtime image.
+
+Run the initial complete pass once:
+
+```bash
+docker compose --profile tools build pics
+docker compose --profile tools run --rm pics node dist/server/src/pics-sync-cli.js --full
+curl http://127.0.0.1:8787/health
+```
+
+Later runs are incremental based on official catalog modification timestamps:
+
+```bash
+docker compose --profile tools run --rm pics
+```
+
+Optional weekly systemd units are included as `deploy/systemd/steam-pinyin-search-pics.*`. Install them using the same process as the daily catalog timer. The worker uses `steam-user` only in an isolated one-shot image; audit that dependency when updating it because Steam protocol libraries parse untrusted network data.
+
 ## Update the application
 
 ```bash
