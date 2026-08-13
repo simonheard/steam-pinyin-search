@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 
 export interface ServerConfig {
+  aliasesPath: string;
   databasePath: string;
   host: string;
   port: number;
@@ -13,6 +14,7 @@ export function readServerConfig(environment: NodeJS.ProcessEnv = process.env): 
   const port = Number(environment.STEAM_PINYIN_PORT ?? 8787);
   if (!Number.isInteger(port) || port < 1 || port > 65_535) throw new Error('STEAM_PINYIN_PORT must be a valid TCP port');
   return {
+    aliasesPath: resolve(environment.STEAM_PINYIN_ALIASES ?? './catalog/aliases.zh-CN.json'),
     databasePath: resolve(environment.STEAM_PINYIN_DB ?? './server/data/catalog.sqlite'),
     host: environment.STEAM_PINYIN_HOST ?? '127.0.0.1',
     port,

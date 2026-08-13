@@ -155,6 +155,20 @@ Consequently, there is no verified official bulk endpoint in the public document
 
 This limitation means the code and tests can be complete, but a production catalog requires a Steam Web API key and a deliberate decision to enable the unofficial localized-details adapter.
 
+### SteamDB and alias enrichment follow-up (2026-08-12)
+
+SteamDB is not an acceptable ingestion source: it states that it has no API, forbids automated scraping/crawling, and may automatically ban crawlers. SteamDB itself recommends obtaining basic app information from Steam through SteamKit/PICS, SteamCMD, or Steam Web APIs. The project therefore does not call or scrape SteamDB.
+
+The adopted enrichment layers are:
+
+1. Steam's official bulk catalog remains the identity and incremental-update source.
+2. Steam-owned Store `appdetails?l=schinese` remains an optional, isolated, rate-limited adapter. It is not suitable for indiscriminately refreshing all 178k games: the endpoint is undocumented, one-AppID-at-a-time in current practice, and commonly observed at roughly 200 requests per five minutes.
+3. `catalog/aliases.zh-CN.json` is a small CC0, AppID-keyed, human-reviewed overlay for high-value Chinese names and colloquial aliases. Alias pinyin and initials are indexed too.
+4. Wikidata is the preferred future broad community layer: structured data is CC0, Steam AppID is property P1733, and Chinese labels/aliases can be joined without guessing identities. Its coverage is strongest for notable games, not the entire Steam catalog, so it complements rather than replaces Steam data.
+5. SteamKit/PICS is the preferred experiment for broader Steam-native app metadata. It talks to Steam directly, as SteamDB itself documents, but needs a separately benchmarked collector and careful public-only filtering before becoming a production dependency.
+
+Unofficial Xiaoheihe/HeyBox endpoints and scraped game sites are not enabled: no current stable public API contract or redistribution license was found. A source without an explicit reuse contract must be treated as opt-in experimental, never as the default catalog dependency.
+
 ## Pinyin library choice
 
 `pinyin-pro` remains the best fit for the TypeScript frontend/server shared logic:

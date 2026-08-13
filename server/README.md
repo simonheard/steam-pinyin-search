@@ -78,10 +78,17 @@ docker compose up -d --build api
 | `STEAM_PINYIN_ALLOWED_ORIGINS` | Steam Store/checkout origins | Comma-separated CORS allowlist. |
 | `STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS` | `false` | Enables the rate-limited unofficial Simplified Chinese details adapter. Read `docs/research.md` before enabling. |
 | `STEAM_PINYIN_SYNC_ON_START` | `true` | Incrementally sync before starting the API container. |
+| `STEAM_PINYIN_ALIASES` | `/app/catalog/aliases.zh-CN.json` | Curated CC0 Chinese names and common aliases imported after each catalog sync. |
 
 The server accepts no SteamID, library list, account token, machine ID, or analytics payload. `/api/search` receives only `q` and `limit`.
 
 The API container may run without a Web API key when `STEAM_PINYIN_SYNC_ON_START=false`, for example when serving an already-populated persistent volume. Catalog sync still requires the key, and the `sync` Compose profile fails fast when it is missing.
+
+## Chinese aliases
+
+`catalog/aliases.zh-CN.json` is a deliberately small, reviewable CC0 overlay keyed by Steam AppID. It supplies popular Chinese display names and unambiguous community aliases such as `老头环`, `黑猴`, and `大表哥2`. Alias text is also converted to full pinyin and initials, so `laotouhuan` and `lth` can match `ELDEN RING`.
+
+Contributions should include the exact Steam AppID and avoid generic words that would create noisy matches. The overlay is merged with existing aliases and never creates catalog rows for unknown AppIDs.
 
 ## Without Docker
 

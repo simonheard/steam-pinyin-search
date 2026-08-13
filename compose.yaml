@@ -11,9 +11,11 @@ services:
       STEAM_PINYIN_ALLOWED_ORIGINS: "${STEAM_PINYIN_ALLOWED_ORIGINS:-https://store.steampowered.com,https://checkout.steampowered.com}"
       STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS: "${STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS:-false}"
       STEAM_PINYIN_SYNC_ON_START: "${STEAM_PINYIN_SYNC_ON_START:-true}"
+      STEAM_PINYIN_ALIASES: "${STEAM_PINYIN_ALIASES:-/app/catalog/aliases.zh-CN.json}"
       STEAM_PINYIN_HOST: 0.0.0.0
       STEAM_PINYIN_PORT: 8787
       STEAM_PINYIN_DB: /data/catalog.sqlite
+      STEAM_PINYIN_ALIASES: "${STEAM_PINYIN_ALIASES:-/app/catalog/aliases.zh-CN.json}"
     volumes:
       - catalog-data:/data
 

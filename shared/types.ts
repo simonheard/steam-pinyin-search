@@ -14,6 +14,8 @@ export interface SearchableGame {
   initials: string;
   pinyinVariants: string[];
   aliases: string[];
+  aliasPinyin?: string[];
+  aliasInitials?: string[];
 }
 
 export type LibraryGameIndex = SearchableGame;
@@ -38,6 +40,7 @@ export type MatchField =
   | 'pinyin-prefix'
   | 'initials-prefix'
   | 'alias-prefix'
+  | 'alias-pinyin'
   | 'substring';
 
 export interface StoreSearchResponse {

@@ -16,11 +16,15 @@ export function indexStoreGame(
   game: Pick<StoreGameIndex, 'appId' | 'name' | 'localizedName' | 'aliases' | 'type' | 'lastModified'>,
 ): StoreGameIndex {
   const searchableName = game.localizedName || game.name;
+  const aliases = game.aliases.map(normalizeSearchText).filter(Boolean);
+  const aliasPinyinFields = game.aliases.map(createPinyinFields);
   return {
     ...game,
     ...createPinyinFields(searchableName),
     normalized: normalizeSearchText(searchableName),
     normalizedName: normalizeSearchText(game.name),
-    aliases: game.aliases.map(normalizeSearchText).filter(Boolean),
+    aliases,
+    aliasPinyin: aliasPinyinFields.flatMap((fields) => fields.pinyinVariants).filter(Boolean),
+    aliasInitials: aliasPinyinFields.map((fields) => fields.initials).filter(Boolean),
   };
 }

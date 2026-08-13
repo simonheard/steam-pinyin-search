@@ -5,6 +5,7 @@ import { MemoryCatalogRepository } from '../server/src/catalog/memory-repository
 import type { CatalogDetailsAdapter, CatalogSource } from '../server/src/catalog/types';
 import { syncCatalog } from '../server/src/catalog/sync';
 import { SteamStoreServiceCatalogSource } from '../server/src/catalog/steam-store-service';
+import { applyAliasDataset } from '../server/src/catalog/curated-aliases';
 
 const openApps: Array<ReturnType<typeof buildServer> extends Promise<infer T> ? T : never> = [];
 
@@ -56,6 +57,20 @@ describe('store search API', () => {
 });
 
 describe('catalog sync', () => {
+  it('merges curated names and aliases without creating missing catalog rows', () => {
+    const repository = new MemoryCatalogRepository([{ appId: 1245620, name: 'ELDEN RING', type: 'game', aliases: ['ER'] }]);
+    const result = applyAliasDataset(repository, {
+      schemaVersion: 1,
+      games: [
+        { appId: 1245620, localizedName: '艾尔登法环', aliases: ['老头环', '法环'] },
+        { appId: 999999, localizedName: 'Missing', aliases: [] },
+      ],
+    });
+    expect(result).toEqual({ matched: 1, missing: 1, changed: 1 });
+    expect(repository.getApp(1245620)).toMatchObject({ localizedName: '艾尔登法环', aliases: ['ER', '老头环', '法环'] });
+    expect(repository.getApp(999999)).toBeNull();
+  });
+
   it('uses the public Steam Web API host for community API keys', async () => {
     const fetchMock = vi.fn(async (input: URL | RequestInfo) => {
       void input;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { indexLibraryGame } from '../shared/index-game';
+import { indexLibraryGame, indexStoreGame } from '../shared/index-game';
 import { searchGames } from '../shared/search';
 
 const games = [
@@ -32,5 +32,15 @@ describe('ranking', () => {
     const results = searchGames(games, '黑神话', 10);
     expect(results[0]?.item.appId).toBe(1);
     expect(results[0]?.score).toBeGreaterThan(0);
+  });
+
+  it.each(['laotouhuan', 'lth'])('matches pinyin generated from a Chinese alias: %s', (query) => {
+    const eldenRing = indexStoreGame({
+      appId: 1245620,
+      name: 'ELDEN RING',
+      type: 'game',
+      aliases: ['老头环'],
+    });
+    expect(searchGames([eldenRing], query, 10)[0]?.item.appId).toBe(1245620);
   });
 });
