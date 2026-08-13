@@ -99,41 +99,52 @@ export async function syncWikidataAliases(
   let localizedAdded = 0;
   let aliasesAdded = 0;
 
-  for (let offset = 0; offset < entityIds.length; offset += 50) {
-    const batch = entityIds.slice(offset, offset + 50);
-    const url = new URL(ENTITY_ENDPOINT);
-    url.searchParams.set('action', 'wbgetentities');
-    url.searchParams.set('ids', batch.join('|'));
-    url.searchParams.set('props', 'labels|aliases');
-    url.searchParams.set('languages', LANGUAGES.join('|'));
-    url.searchParams.set('languagefallback', '1');
-    url.searchParams.set('format', 'json');
-    const response = await fetchJson<EntityResponse>(url, fetchImpl);
-    const updates = [];
-    for (const entityId of batch) {
-      const entity = response.entities?.[entityId];
-      if (!entity) continue;
-      const texts = chineseTexts(entity);
-      for (const appId of mappings.get(entityId) ?? []) {
-        const existing = repository.getApp(appId);
-        if (!existing) continue;
-        matched += 1;
-        const localizedName = existing.localizedName ?? texts.label;
-        const additions = [...(texts.label ? [texts.label] : []), ...texts.aliases].filter(
-          (value) => value !== existing.name && value !== localizedName,
-        );
-        const aliases = [...new Set([...existing.aliases, ...additions])];
-        const didChange = localizedName !== existing.localizedName || aliases.length !== existing.aliases.length;
-        if (!didChange) continue;
-        if (!existing.localizedName && localizedName) localizedAdded += 1;
-        aliasesAdded += aliases.length - existing.aliases.length;
-        changed += 1;
-        updates.push({ ...existing, ...(localizedName ? { localizedName } : {}), aliases });
+  const concurrency = 3;
+  const entityBatchSize = 50;
+  for (let offset = 0; offset < entityIds.length; offset += entityBatchSize * concurrency) {
+    const batches = Array.from({ length: concurrency }, (_, index) =>
+      entityIds.slice(offset + index * entityBatchSize, offset + (index + 1) * entityBatchSize),
+    ).filter((batch) => batch.length > 0);
+    const responses = await Promise.all(
+      batches.map(async (batch) => {
+        const url = new URL(ENTITY_ENDPOINT);
+        url.searchParams.set('action', 'wbgetentities');
+        url.searchParams.set('ids', batch.join('|'));
+        url.searchParams.set('props', 'labels|aliases');
+        url.searchParams.set('languages', LANGUAGES.join('|'));
+        url.searchParams.set('languagefallback', '1');
+        url.searchParams.set('format', 'json');
+        return { batch, response: await fetchJson<EntityResponse>(url, fetchImpl) };
+      }),
+    );
+    for (const { batch, response } of responses) {
+      const updates = [];
+      for (const entityId of batch) {
+        const entity = response.entities?.[entityId];
+        if (!entity) continue;
+        const texts = chineseTexts(entity);
+        for (const appId of mappings.get(entityId) ?? []) {
+          const existing = repository.getApp(appId);
+          if (!existing) continue;
+          matched += 1;
+          const localizedName = existing.localizedName ?? texts.label;
+          const additions = [...(texts.label ? [texts.label] : []), ...texts.aliases].filter(
+            (value) => value !== existing.name && value !== localizedName,
+          );
+          const aliases = [...new Set([...existing.aliases, ...additions])];
+          const didChange = localizedName !== existing.localizedName || aliases.length !== existing.aliases.length;
+          if (!didChange) continue;
+          if (!existing.localizedName && localizedName) localizedAdded += 1;
+          aliasesAdded += aliases.length - existing.aliases.length;
+          changed += 1;
+          updates.push({ ...existing, ...(localizedName ? { localizedName } : {}), aliases });
+        }
       }
+      if (updates.length) repository.upsertApps(updates);
     }
-    if (updates.length) repository.upsertApps(updates);
-    options.onProgress?.(Math.min(offset + batch.length, entityIds.length), entityIds.length);
-    if (offset + batch.length < entityIds.length) await new Promise((resolve) => setTimeout(resolve, 100));
+    const processed = Math.min(offset + batches.reduce((sum, batch) => sum + batch.length, 0), entityIds.length);
+    options.onProgress?.(processed, entityIds.length);
+    if (processed < entityIds.length) await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   repository.setState(LAST_SUCCESSFUL_SYNC_KEY, String(Math.floor(Date.now() / 1000)));
