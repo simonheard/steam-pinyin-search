@@ -4,6 +4,16 @@
   "private": true,
   "type": "module",
   "description": "Millennium plugin and Store API for Steam pinyin search",
+  "author": "Simon Heard",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simonheard/steam-pinyin-search.git"
+  },
+  "homepage": "https://github.com/simonheard/steam-pinyin-search#readme",
+  "bugs": {
+    "url": "https://github.com/simonheard/steam-pinyin-search/issues"
+  },
   "scripts": {
     "dev": "millennium-ttc --build dev",
     "build:plugin": "millennium-ttc --build prod",
@@ -24,7 +34,8 @@
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "fastify": "^5.5.0",
-    "pinyin-pro": "3.28.2"
+    "pinyin-pro": "3.28.2",
+    "tslib": "2.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -48,7 +59,8 @@
     "node": ">=22.5"
   },
   "overrides": {
+    "adm-zip": "0.6.0",
+    "protobufjs": "7.6.5",
     "serialize-javascript": "7.0.5"
-  },
-  "license": "MIT"
+  }
 }

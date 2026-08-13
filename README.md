@@ -4,13 +4,15 @@ A Millennium 3.4 plugin that adds full-pinyin, compact-pinyin, and pinyin-initia
 
 Library data stays on the user's machine. Store search makes no plugin network request unless the user configures a remote server. Remote requests contain only the normalized query and result limit; there is no Steam ID, library upload, analytics, account system, service, or resident process.
 
+**普通用户请直接看 [中文安装、升级与卸载教程](docs/installation.md)。** 本项目提供手动插件 ZIP 和包含官方 Millennium Installer 的 Windows 裸 Steam 小白包。Millennium 官方商店不接收 ZIP；正式收录前后的流程见 [提交准备清单](docs/submission-checklist.md)。
+
 ## Platform compatibility
 
 | Platform | Millennium status | This plugin |
 | --- | --- | --- |
 | Windows 10/11, x64 | Officially supported | Runtime-validated with Millennium 3.4.0 and Steam Stable; novice bundle available. |
 | Native Linux Steam, x86/x86_64 | Officially supported | The frontend-only plugin is designed to be portable, but Linux build and Steam runtime validation are still pending. Flatpak Steam, Snap Steam, and ARM distributions are not supported by Millennium. |
-| macOS | Not listed as a supported end-user platform; upstream has an experimental source-built wrapper | Treat both Millennium and this plugin as experimental on macOS; build and Steam runtime validation are still pending, and no novice bundle is provided. |
+| macOS | Millennium upstream provides an experimental wrapper/install path | Treat both Millennium and this plugin as experimental on macOS; Steam runtime validation is still pending, automatic Millennium updates are limited, and no novice bundle is provided. |
 
 The plugin contains no native binary and has no Millennium Python backend (`useBackend: false`), so its packaged JavaScript is platform-neutral. That does not guarantee that Steam's internal Library hooks are identical on every OS; the native search remains untouched if discovery fails. See [docs/publishing.md](docs/publishing.md) for platform paths and the official publication workflow.
 
@@ -68,7 +70,7 @@ Extract the resulting `artifacts\steam-pinyin-search-v0.1.0.zip` into the platfo
 
 Do **not** upload the ZIP to Millennium. The current official process is to make the plugin repository public, fork [SteamClientHomebrew/PluginDatabase](https://github.com/SteamClientHomebrew/PluginDatabase), add this repository under `plugins/steam-pinyin-search` as a Git submodule, and open a plugin-submission pull request. The database pins an audited commit; each future plugin update requires another pull request advancing that pointer.
 
-After approval, users install with the plugin ID shown on [steambrew.app/plugins](https://steambrew.app/plugins) from **Millennium Settings → Plugins → Install a plugin**. GitHub Release ZIP assets remain optional and are useful only for manual testers. The current repository is private, so it must be made public before an official submission. The exact commands, review checklist, and release choices are in [docs/publishing.md](docs/publishing.md).
+After approval, users install with the plugin ID shown on [steambrew.app/plugins](https://steambrew.app/plugins) from **Millennium Settings → Plugins → Install a plugin**. GitHub Release ZIP assets remain optional and are useful for manual testers. The exact commands, review checklist, uncompleted human tests, and release choices are in [docs/submission-checklist.md](docs/submission-checklist.md) and [docs/publishing.md](docs/publishing.md).
 
 ## Windows novice bundle（裸 Steam 小白整合包）
 
@@ -103,7 +105,7 @@ $env:STEAM_WEB_API_KEY = 'server-side-key'
 $env:STEAM_PINYIN_DB = '.\server\data\catalog.sqlite'
 $env:STEAM_PINYIN_HOST = '127.0.0.1'
 $env:STEAM_PINYIN_PORT = '8787'
-$env:STEAM_PINYIN_ALLOWED_ORIGINS = 'https://store.steampowered.com,https://checkout.steampowered.com'
+$env:STEAM_PINYIN_ALLOWED_ORIGINS = 'https://store.steampowered.com,https://checkout.steampowered.com,https://steamloopback.host'
 $env:STEAM_PINYIN_ENABLE_LOCALIZED_DETAILS = 'false'
 
 npm run server:sync
@@ -117,7 +119,7 @@ Store mode defaults to local and makes no plugin API request. Successful remote 
 Configure it through **Steam → Settings → Millennium → Plugins → Steam Pinyin Search**:
 
 - **Enable Store pinyin search** is the master switch. Disable it and reload Steam to skip Store injection and delete the plugin's local Store catalog.
-- Leave **Store search server** empty for local-only mode.
+- Leave **Online search server (optional)** empty for local-only mode, enter your own HTTPS deployment, or use the maintained public instance `https://steam-search.hede.wang`.
 - Enter the self-hosted HTTPS base URL for remote-first Store search and online Library community aliases. Store failures fall back locally; Library failures leave the original local search untouched.
 - Save, then reload Steam to apply the settings across Store WebKit views.
 
@@ -174,3 +176,7 @@ Tests cover normalization, pinyin, initials, ranking, cache diffs, a 5,000-game 
 ## Privacy and failure behavior
 
 The Library index and cache are localStorage data inside Steam and are never sent to the API. Online Library alias lookup sends only the normalized query, requests at most 50 public results, and filters those results against owned AppIDs locally. A timeout, malformed response, selector failure, or server outage leaves local Library search and native Steam behavior intact.
+
+## License
+
+[MIT](LICENSE) © 2026 Simon Heard. Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Steam and the Steam logo are trademarks of Valve Corporation; this community project is not affiliated with or endorsed by Valve.

@@ -28,13 +28,13 @@ Steam Pinyin Search has no native plugin binary and no Python backend, so the sa
 
 ### macOS
 
-Millennium's public README and user installation guide currently advertise Windows and Linux, not macOS. The upstream source tree contains an experimental `scripts/macos/install_macos.sh` wrapper workflow, and the runtime source resolves the plugin path as:
+Millennium's current public repository includes an experimental macOS wrapper and installer workflow, and the runtime resolves the plugin path as:
 
 ```text
 ~/Library/Application Support/Millennium/plugins
 ```
 
-Upstream also states in its current locale/runtime messages that automatic Millennium updates are not yet available on macOS. This is not a novice-user installation path. Steam Pinyin Search has not yet been built or runtime-tested on macOS; macOS support is experimental.
+Upstream also states in its current locale/runtime messages that automatic Millennium updates are not yet available on macOS. Steam Pinyin Search has not yet been runtime-tested on macOS; macOS support remains experimental and no novice bundle is published.
 
 ## Manual ZIP distribution
 
@@ -65,6 +65,8 @@ The official database consumes a public Git repository, not a release ZIP:
 5. Push the fork branch and open a pull request using the **Plugin Submission** template. Declare that the plugin does not use a standard Python backend or custom native binaries.
 6. Respond to review and third-party testing. Approval makes the plugin available on `steambrew.app`; users then enter its plugin ID in Millennium settings.
 
+The repository contains a current, copy-ready checklist and PR description at [submission-checklist.md](submission-checklist.md). Do not self-check the official template's independent third-party Stable/Beta confirmation boxes.
+
 For an update, advance the submodule pointer in a new PluginDatabase pull request:
 
 ```bash
@@ -80,7 +82,7 @@ The safety model intentionally prevents repository changes from auto-publishing 
 - Optionally publish `steam-pinyin-search-v0.1.0.zip` as a GitHub Release asset for manual beta testing.
 - Publish the Windows easy-install ZIP separately and label it Windows-only.
 - Do not bundle an unofficial Linux or macOS Millennium installer. Link to upstream installation instructions instead.
-- Do not submit the plugin store PR until the remote Store API has a stable public HTTPS endpoint, or ship Library-only behavior by default and state the Store limitation clearly.
+- The optional maintained API is available at `https://steam-search.hede.wang`; the plugin still defaults to local-only and the service can be self-hosted.
 
 ## Sources
 

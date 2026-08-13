@@ -5,5 +5,9 @@
   "description": "Local pinyin search for the Steam Library and privacy-preserving public Store search.",
   "version": "0.1.0",
   "useBackend": false,
-  "webkitApiVersion": "2.0.0"
+  "webkitApiVersion": "2.0.0",
+  "include": [
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ]
 }
