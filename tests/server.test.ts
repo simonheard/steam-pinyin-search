@@ -81,6 +81,23 @@ describe('catalog sync', () => {
     expect(repository.getState('catalog.pics_last_successful_sync')).not.toBeNull();
   });
 
+  it('keeps its checkpoint when a bounded PICS session has more work', async () => {
+    const repository = new MemoryCatalogRepository(
+      Array.from({ length: 5 }, (_, index) => ({ appId: index + 1, name: `Game ${index + 1}`, type: 'game', aliases: [] })),
+    );
+    const client: PicsClient = {
+      async connect() {},
+      async getSimplifiedChineseNames() {
+        return new Map();
+      },
+      close() {},
+    };
+    const result = await syncPicsLocalizedNames(repository, { batchSize: 2, maxAppsPerSession: 2, full: true }, client);
+    expect(result).toMatchObject({ candidates: 5, scanned: 2, complete: false, remaining: 3, lastAppId: 2 });
+    expect(repository.getState('catalog.pics_checkpoint_appid')).toBe('2');
+    expect(repository.getState('catalog.pics_last_successful_sync')).toBeNull();
+  });
+
   it('merges curated names and aliases without creating missing catalog rows', () => {
     const repository = new MemoryCatalogRepository([{ appId: 1245620, name: 'ELDEN RING', type: 'game', aliases: ['ER'] }]);
     const result = applyAliasDataset(repository, {

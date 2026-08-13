@@ -63,7 +63,7 @@ The timer runs daily with a randomized delay, prevents overlapping syncs, and re
 
 ## Steam-native Chinese title enrichment
 
-The isolated `pics` worker logs on anonymously to Steam and requests public PICS AppInfo in batches. It reads `common.name_localized.schinese`, checkpoints after every batch, updates only changed names, and can resume after interruption. It exposes no port, receives no user credentials, and is not part of the public API runtime image.
+The isolated `pics` worker logs on anonymously to Steam and requests public PICS AppInfo in batches. It reads `common.name_localized.schinese`, checkpoints after every batch, updates only changed names, and can resume after interruption. Each process is limited to 40,000 apps because `steam-user` retains PICS data for the lifetime of a connection; the systemd service restarts exit status 75 and resumes from the checkpoint until complete. It exposes no port, receives no user credentials, and is not part of the public API runtime image.
 
 Run the initial complete pass once:
 

@@ -8,6 +8,7 @@ const CHECKPOINT_KEY = 'catalog.pics_checkpoint_appid';
 export interface PicsLocalizedSyncOptions {
   batchSize?: number;
   full?: boolean;
+  maxAppsPerSession?: number;
   onProgress?: (progress: PicsLocalizedSyncProgress) => void;
 }
 
@@ -20,6 +21,8 @@ export interface PicsLocalizedSyncProgress {
 
 export interface PicsLocalizedSyncResult extends PicsLocalizedSyncProgress {
   candidates: number;
+  complete: boolean;
+  remaining: number;
   startedAt: number;
   completedAt: number;
 }
@@ -95,11 +98,17 @@ export async function syncPicsLocalizedNames(
   const startedAt = Math.floor(Date.now() / 1000);
   const batchSize = options.batchSize ?? 500;
   if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > 2_000) throw new RangeError('PICS batch size must be between 1 and 2000');
+  const maxAppsPerSession = options.maxAppsPerSession ?? Number.POSITIVE_INFINITY;
+  if (!(maxAppsPerSession === Number.POSITIVE_INFINITY || (Number.isInteger(maxAppsPerSession) && maxAppsPerSession >= batchSize))) {
+    throw new RangeError('PICS session size must be at least one batch');
+  }
   const lastSuccessfulSync = Number(repository.getState(LAST_SUCCESSFUL_SYNC_KEY) ?? 0);
   const checkpoint = Number(repository.getState(CHECKPOINT_KEY) ?? 0);
-  const candidates = repository
+  const allCandidates = repository
     .listApps()
     .filter((app) => app.appId > checkpoint && (options.full || !lastSuccessfulSync || (app.lastModified ?? 0) >= lastSuccessfulSync));
+  const candidates = allCandidates.slice(0, maxAppsPerSession);
+  const remaining = allCandidates.length - candidates.length;
   let scanned = 0;
   let localized = 0;
   let changed = 0;
@@ -128,7 +137,10 @@ export async function syncPicsLocalizedNames(
   }
 
   const completedAt = Math.floor(Date.now() / 1000);
-  repository.setState(LAST_SUCCESSFUL_SYNC_KEY, String(completedAt));
-  repository.setState(CHECKPOINT_KEY, '0');
-  return { candidates: candidates.length, scanned, localized, changed, lastAppId, startedAt, completedAt };
+  const complete = remaining === 0;
+  if (complete) {
+    repository.setState(LAST_SUCCESSFUL_SYNC_KEY, String(completedAt));
+    repository.setState(CHECKPOINT_KEY, '0');
+  }
+  return { candidates: allCandidates.length, complete, remaining, scanned, localized, changed, lastAppId, startedAt, completedAt };
 }
