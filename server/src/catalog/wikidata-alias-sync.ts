@@ -65,23 +65,21 @@ async function fetchJson<T>(url: URL, fetchImpl: typeof fetch): Promise<T> {
 
 async function loadSteamMappings(fetchImpl: typeof fetch): Promise<Map<string, number[]>> {
   const mappings = new Map<string, number[]>();
-  const pageSize = 5_000;
-  for (let offset = 0; ; offset += pageSize) {
-    const query = `SELECT ?item ?appid WHERE { ?item wdt:P1733 ?appid. } ORDER BY ?item ?appid LIMIT ${pageSize} OFFSET ${offset}`;
-    const url = new URL(WDQS_ENDPOINT);
-    url.searchParams.set('format', 'json');
-    url.searchParams.set('query', query);
-    const response = await fetchJson<SparqlResponse>(url, fetchImpl);
-    const rows = response.results?.bindings ?? [];
-    for (const row of rows) {
-      const entityId = row.item?.value.match(/\/entity\/(Q\d+)$/)?.[1];
-      const appId = Number(row.appid?.value);
-      if (!entityId || !Number.isSafeInteger(appId) || appId <= 0) continue;
-      const ids = mappings.get(entityId) ?? [];
-      if (!ids.includes(appId)) ids.push(appId);
-      mappings.set(entityId, ids);
-    }
-    if (rows.length < pageSize) break;
+  const resultLimit = 200_000;
+  const query = `SELECT ?item ?appid WHERE { ?item wdt:P1733 ?appid. } LIMIT ${resultLimit}`;
+  const url = new URL(WDQS_ENDPOINT);
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('query', query);
+  const response = await fetchJson<SparqlResponse>(url, fetchImpl);
+  const rows = response.results?.bindings ?? [];
+  if (rows.length >= resultLimit) throw new Error(`Wikidata Steam AppID mapping reached its safety limit of ${resultLimit}`);
+  for (const row of rows) {
+    const entityId = row.item?.value.match(/\/entity\/(Q\d+)$/)?.[1];
+    const appId = Number(row.appid?.value);
+    if (!entityId || !Number.isSafeInteger(appId) || appId <= 0) continue;
+    const ids = mappings.get(entityId) ?? [];
+    if (!ids.includes(appId)) ids.push(appId);
+    mappings.set(entityId, ids);
   }
   return mappings;
 }

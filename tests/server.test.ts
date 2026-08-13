@@ -124,7 +124,7 @@ describe('catalog sync', () => {
       });
     });
     const result = await syncWikidataAliases(repository, { fetchImpl: fetchMock as unknown as typeof fetch });
-    expect(new URL(String(fetchMock.mock.calls[0]?.[0])).searchParams.get('query')).toContain('ORDER BY ?item ?appid');
+    expect(new URL(String(fetchMock.mock.calls[0]?.[0])).searchParams.get('query')).toContain('LIMIT 200000');
     expect(result).toMatchObject({ mappings: 2, entities: 2, matched: 2, changed: 2, localizedAdded: 1, aliasesAdded: 2 });
     expect(repository.getApp(1)).toMatchObject({ localizedName: 'Steam 中文名', aliases: ['社区中文名', '俗名'] });
     expect(repository.getApp(2)).toMatchObject({ localizedName: '游戏二', aliases: [] });
