@@ -36,6 +36,7 @@ export type MatchField =
   | 'normalized-exact'
   | 'pinyin-exact'
   | 'initials-exact'
+  | 'alias-exact'
   | 'name-prefix'
   | 'pinyin-prefix'
   | 'initials-prefix'

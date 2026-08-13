@@ -43,4 +43,10 @@ describe('ranking', () => {
     });
     expect(searchGames([eldenRing], query, 10)[0]?.item.appId).toBe(1245620);
   });
+
+  it('ranks an exact curated alias initial above an unrelated title initial', () => {
+    const curated = indexStoreGame({ appId: 1, name: 'DAVE THE DIVER', type: 'game', aliases: ['潜水员'] });
+    const unrelated = indexStoreGame({ appId: 2, name: '奇兽异传', type: 'game', aliases: [] });
+    expect(searchGames([unrelated, curated], 'qsy', 10)[0]?.item.appId).toBe(1);
+  });
 });
