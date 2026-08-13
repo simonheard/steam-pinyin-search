@@ -110,25 +110,33 @@ describe('catalog sync', () => {
         return Response.json({
           results: {
             bindings: [
-              { item: { value: 'http://www.wikidata.org/entity/Q1' }, appid: { value: '1' } },
-              { item: { value: 'http://www.wikidata.org/entity/Q2' }, appid: { value: '2' } },
+              {
+                item: { value: 'http://www.wikidata.org/entity/Q1' },
+                appid: { value: '1' },
+                label: { value: '社区中文名', 'xml:lang': 'zh-cn' },
+              },
+              {
+                item: { value: 'http://www.wikidata.org/entity/Q1' },
+                appid: { value: '1' },
+                alias: { value: '俗名', 'xml:lang': 'zh' },
+              },
+              {
+                item: { value: 'http://www.wikidata.org/entity/Q2' },
+                appid: { value: '2' },
+                label: { value: '游戏二', 'xml:lang': 'zh' },
+              },
             ],
           },
         });
       }
-      return Response.json({
-        entities: {
-          Q1: { labels: { 'zh-cn': { value: '社区中文名' } }, aliases: { zh: [{ value: '俗名' }] } },
-          Q2: { labels: { zh: { value: '游戏二' } }, aliases: {} },
-        },
-      });
+      throw new Error(`Unexpected URL: ${url}`);
     });
     const result = await syncWikidataAliases(repository, { fetchImpl: fetchMock as unknown as typeof fetch });
     expect(new URL(String(fetchMock.mock.calls[0]?.[0])).searchParams.get('query')).toContain('LIMIT 200000');
     expect(result).toMatchObject({ mappings: 2, entities: 2, matched: 2, changed: 2, localizedAdded: 1, aliasesAdded: 2 });
     expect(repository.getApp(1)).toMatchObject({ localizedName: 'Steam 中文名', aliases: ['社区中文名', '俗名'] });
     expect(repository.getApp(2)).toMatchObject({ localizedName: '游戏二', aliases: [] });
-    expect(repository.getState('catalog.wikidata_checkpoint_entity')).toBe('');
+    expect(repository.getState('catalog.wikidata_last_successful_sync')).not.toBeNull();
   });
 
   it('merges curated names and aliases without creating missing catalog rows', () => {
