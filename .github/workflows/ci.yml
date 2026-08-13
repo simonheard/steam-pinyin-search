@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  plugin-database-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # PluginDatabase currently builds on Node 20. Pin the newest compatible
+      # pnpm major; pnpm 11.21+ requires Node 22.13.
+      - run: npm install --global pnpm@10.34.5
+      - run: pnpm install
+        env:
+          NODE_ENV: production
+      - run: pnpm run build
+        env:
+          NODE_ENV: production
+      - name: Check distribution inputs
+        run: test -f plugin.json && test -f .millennium/Dist/index.js && test -f .millennium/Dist/webkit.js && test -f LICENSE && test -f THIRD_PARTY_NOTICES.md
