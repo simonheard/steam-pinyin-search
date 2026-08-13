@@ -3,7 +3,7 @@
   "name": "steam-pinyin-search",
   "common_name": "Steam Pinyin Search",
   "description": "Local pinyin search for the Steam Library and privacy-preserving public Store search.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "useBackend": false,
   "webkitApiVersion": "2.0.0",
   "include": [

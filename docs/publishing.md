@@ -6,7 +6,7 @@ Verified against the official Millennium documentation and repositories on 2026-
 
 ### Windows
 
-Windows is the only Steam runtime validated platform for Steam Pinyin Search v0.1.0. The repository's novice bundle includes the unmodified, signed official Millennium installer and a PowerShell bootstrap. It is Windows-only.
+Windows is the only Steam runtime validated platform for Steam Pinyin Search. The repository's novice bundle includes the unmodified, signed official Millennium installer and a PowerShell bootstrap. It is Windows-only.
 
 The tested Millennium 3.4.0 runtime stores plugins at:
 
@@ -44,7 +44,7 @@ Run on Windows:
 npm run package:plugin
 ```
 
-The result is `artifacts/steam-pinyin-search-v0.1.0.zip`. It contains a top-level `steam-pinyin-search` directory. Extract that directory into the platform plugin path, then enable the plugin in Millennium settings and reload Steam.
+The result is a versioned `artifacts/steam-pinyin-search-v*.zip`. It contains a top-level `steam-pinyin-search` directory. Extract that directory into the platform plugin path, then enable the plugin in Millennium settings and reload Steam.
 
 This ZIP is suitable for testers and GitHub Release attachments. It is not uploaded to, or imported by, Millennium's **Install a plugin** field. That field accepts an approved plugin ID from the official database.
 
@@ -79,7 +79,7 @@ The safety model intentionally prevents repository changes from auto-publishing 
 ## Release recommendation
 
 - Use the official PluginDatabase path for ordinary end users and updates.
-- Optionally publish `steam-pinyin-search-v0.1.0.zip` as a GitHub Release asset for manual beta testing.
+- Optionally publish the versioned `steam-pinyin-search-v*.zip` as a GitHub Release asset for manual beta testing.
 - Publish the Windows easy-install ZIP separately and label it Windows-only.
 - Do not bundle an unofficial Linux or macOS Millennium installer. Link to upstream installation instructions instead.
 - The optional maintained API is available at `https://steam-search.hede.wang`; the plugin still defaults to local-only and the service can be self-hosted.

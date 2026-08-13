@@ -1,18 +1,24 @@
-import { DialogBodyText, DialogButton, IconsModule, TextField, ToggleField, definePlugin, pluginConfig, routerHook, usePluginConfig, useWindowRef } from '@steambrew/client';
+import { BindPluginSettings, DialogBodyText, DialogButton, IconsModule, TextField, ToggleField, definePlugin, pluginConfig, routerHook, usePluginConfig, useWindowRef } from '@steambrew/client';
 import { useEffect, useState } from 'react';
 
 import { createLogger } from '../shared/logger';
-import { normalizeServerUrl, STORE_SEARCH_ENABLED_KEY, STORE_SERVER_URL_KEY } from '../shared/plugin-settings';
+import { normalizeServerUrl, readStorePluginSettings, STORE_SEARCH_ENABLED_KEY, STORE_SERVER_URL_KEY } from '../shared/plugin-settings';
 import { buildLibraryIndex } from './library/indexer';
 import { LibrarySearchIndex } from './library/search';
 import { LibraryRemoteAliasSearchClient, type LibraryRemoteAliasSearch } from './library/remote-alias-search';
-import { persistSettingWithReadback } from './settings-persistence';
+import {
+  isMillenniumConfigAcknowledgementError,
+  persistSettingWithReadback,
+  readBoundStoreSettings,
+  readMirroredServerUrl,
+  writeMirroredServerUrl,
+} from './settings-persistence';
 import { findLibrarySearchInput, installLibrarySearchInputHook } from './steam-integration/library-search-input';
 import { installLibrarySearchHook } from './steam-integration/library-search-hook';
 import { extractLibraryGames, waitForSteamGlobals } from './steam-integration/resolve';
 import type { CleanupHandle, SteamLibraryStoreLike } from './steam-integration/types';
 
-const PLUGIN_VERSION = '0.1.0';
+const PLUGIN_VERSION = '0.1.1';
 const BRIDGE_NAME = 'steam-pinyin-search-library-bridge';
 const logger = createLogger(localStorage.getItem('steam-pinyin-search:debug') === '1');
 
@@ -25,6 +31,22 @@ let runtimeStatus: PluginRuntimeStatus = { state: 'starting', message: 'Waiting 
 let cleanupHandle: CleanupHandle | null = null;
 let bridgeRuntime: { store: SteamLibraryStoreLike; searchIndex: LibrarySearchIndex; remoteAliasSearch?: LibraryRemoteAliasSearch } | null = null;
 const bridgeRefreshListeners = new Set<() => void>();
+
+async function readRuntimeStoreSettings() {
+  const mirroredServer = readMirroredServerUrl(localStorage);
+  if (mirroredServer) return { enabled: true, remoteServer: mirroredServer };
+  // Keep explicit plugin-name calls behind aliases so TTC does not inject a
+  // duplicate argument. Millennium 3.4 otherwise receives a numeric value in
+  // the pluginName slot and rejects the config request before returning data.
+  const getAll = pluginConfig.getAll as unknown as (pluginName: string) => Promise<unknown>;
+  try {
+    return readStorePluginSettings(await getAll('steam-pinyin-search'));
+  } catch {
+    // The bound store is available in windows where config IPC is not ready.
+  }
+  const bindSettings = BindPluginSettings as unknown as (pluginName: string) => unknown;
+  return readBoundStoreSettings(() => bindSettings('steam-pinyin-search'));
+}
 
 function setBridgeRuntime(runtime: typeof bridgeRuntime): void {
   bridgeRuntime = runtime;
@@ -78,7 +100,9 @@ async function startLibraryIntegration(): Promise<void> {
     const searchIndex = new LibrarySearchIndex(build.games);
     let remoteAliasSearch: LibraryRemoteAliasSearch | undefined;
     try {
-      const remoteServer = normalizeServerUrl(await pluginConfig.get<string>(STORE_SERVER_URL_KEY));
+      const runtimeSettings = await readRuntimeStoreSettings();
+      const remoteServer = runtimeSettings.remoteServer;
+      logger.info(`plugin settings detected: remote=${Boolean(remoteServer)}, store=${runtimeSettings.enabled}`);
       if (remoteServer) {
         remoteAliasSearch = new LibraryRemoteAliasSearchClient(remoteServer, new Set(sources.map((game) => game.appId)), logger);
         logger.info('library online alias search enabled');
@@ -117,16 +141,31 @@ function SettingsContent() {
     return () => window.clearInterval(timer);
   }, []);
   useEffect(() => setServerDraft(storedServerUrl ?? ''), [storedServerUrl]);
+  useEffect(() => {
+    if (typeof storedServerUrl === 'string') writeMirroredServerUrl(localStorage, storedServerUrl);
+  }, [storedServerUrl]);
 
   const saveServer = (): void => {
     try {
       const normalized = normalizeServerUrl(serverDraft) ?? '';
-      void persistSettingWithReadback(setStoredServerUrl, () => pluginConfig.get<string>(STORE_SERVER_URL_KEY), normalized)
+      void persistSettingWithReadback(setStoredServerUrl, async () => (await readRuntimeStoreSettings()).remoteServer ?? '', normalized)
         .then(() => {
+          writeMirroredServerUrl(localStorage, normalized);
           setServerDraft(normalized);
           setServerMessage(normalized ? 'Online search server saved. Reload Steam to apply it.' : 'Local-only mode saved. Reload Steam to apply it.');
         })
-        .catch(() => setServerMessage('Could not save the server setting. Check the Millennium logs.'));
+        .catch((error) => {
+          if (isMillenniumConfigAcknowledgementError(error)) {
+            // Millennium 3.4 persisted the value before rejecting its malformed
+            // acknowledgement. Mirror it for the Library window and ask for the
+            // same reload that normal saves require.
+            writeMirroredServerUrl(localStorage, normalized);
+            setServerDraft(normalized);
+            setServerMessage(normalized ? 'Online search server saved. Reload Steam to apply it.' : 'Local-only mode saved. Reload Steam to apply it.');
+            return;
+          }
+          setServerMessage('Could not save the server setting. Check the Millennium logs.');
+        });
     } catch (error) {
       setServerMessage(error instanceof Error ? error.message : 'Invalid server URL.');
     }
@@ -144,9 +183,15 @@ function SettingsContent() {
         description="When disabled, the plugin does not inject Store search, keep local Store data, or send Store requests. Reload Steam after changing this option."
         checked={storeEnabled}
         onChange={(checked) => {
-          void persistSettingWithReadback(setStoreEnabled, () => pluginConfig.get<boolean>(STORE_SEARCH_ENABLED_KEY), checked)
+          void persistSettingWithReadback(setStoreEnabled, async () => (await readRuntimeStoreSettings()).enabled, checked)
             .then(() => setServerMessage('Setting saved. Reload Steam to apply it.'))
-            .catch(() => setServerMessage('Could not save the Store switch. Check the Millennium logs.'));
+            .catch((error) =>
+              setServerMessage(
+                isMillenniumConfigAcknowledgementError(error)
+                  ? 'Setting saved. Reload Steam to apply it.'
+                  : 'Could not save the Store switch. Check the Millennium logs.',
+              ),
+            );
         }}
       />
       <TextField

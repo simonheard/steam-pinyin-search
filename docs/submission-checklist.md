@@ -68,8 +68,9 @@ git push -u origin add-steam-pinyin-search
 ```
 
 然后向 `SteamClientHomebrew/PluginDatabase` 开 pull request，选择 **Plugin
-Submission** 模板。提交中的 submodule 应固定到已经测试、CI 通过且与 v0.1.0
-Release 一致的 commit。
+Submission** 模板。提交中的 submodule 应固定到已经测试、CI 通过且与最新 Release
+一致的 commit。当前应使用 v0.1.1 commit，而不是旧的 v0.1.0 tag；v0.1.1
+包含 Millennium 3.4 设置保存兼容修复。
 
 ## 可复制的 PR 说明草稿
 

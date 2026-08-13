@@ -16,7 +16,7 @@
 
 ## 方式二：手动 ZIP（Windows / Linux / macOS）
 
-从 GitHub Release 下载 `steam-pinyin-search-v0.1.0.zip`，完整解压后，把其中
+从 GitHub Release 下载最新的 `steam-pinyin-search-v*.zip`，完整解压后，把其中
 顶层的 `steam-pinyin-search` 文件夹放入：
 
 | 平台 | 插件目录 |
@@ -39,7 +39,7 @@ Steam Beta 也暂不声明兼容：2026-08-13 的 `publicbeta` build `1786491548
 
 ## 方式三：Windows 裸 Steam 小白包
 
-下载并完整解压 `steam-pinyin-search-easy-install-v0.1.0.zip`：
+下载并完整解压最新的 `steam-pinyin-search-easy-install-v*.zip`：
 
 1. 退出 Steam。
 2. 双击 `install.cmd`，同意管理员权限。

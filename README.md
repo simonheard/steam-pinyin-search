@@ -66,7 +66,7 @@ For a self-contained archive:
 npm run package:plugin
 ```
 
-Extract the resulting `artifacts\steam-pinyin-search-v0.1.0.zip` into the platform's Millennium plugin directory. The ZIP is a manual/beta distribution archive; Millennium's **Install a plugin** screen does not accept this local ZIP. In Steam, open **Settings → Millennium → Plugins**, enable **Steam Pinyin Search**, and reload Steam. Enabled plugins load with Steam/Millennium; no separate client process is installed.
+Extract the resulting versioned `artifacts\steam-pinyin-search-v*.zip` into the platform's Millennium plugin directory. The ZIP is a manual/beta distribution archive; Millennium's **Install a plugin** screen does not accept this local ZIP. In Steam, open **Settings → Millennium → Plugins**, enable **Steam Pinyin Search**, and reload Steam. Enabled plugins load with Steam/Millennium; no separate client process is installed.
 
 ## Publish to the Millennium plugin store
 
@@ -82,7 +82,7 @@ Users who have ordinary Windows Steam but no Millennium can use the novice bundl
 npm run package:easy
 ```
 
-This creates `artifacts\steam-pinyin-search-easy-install-v0.1.0.zip`. After fully extracting it, the user double-clicks `install.cmd`, approves the administrator prompt, and completes the visible official Millennium installer. The bootstrap then installs the plugin, adds it to `enabledPlugins`, and restarts Steam.
+This creates a versioned `artifacts\steam-pinyin-search-easy-install-v*.zip`. After fully extracting it, the user double-clicks `install.cmd`, approves the administrator prompt, and completes the visible official Millennium installer. The bootstrap then installs the plugin, adds it to `enabledPlugins`, and restarts Steam.
 
 The bundle does **not** modify or re-sign Millennium. It carries the unmodified SteamClientHomebrew Installer v1.12.1 release, verifies its published SHA-256 and valid SignPath Authenticode signature, and lets that official installer download the current stable runtime. This preserves upstream trust and update handling. It is therefore a network bootstrap bundle, not a frozen offline repack. The upstream installer and Millennium are MIT licensed; attribution and source URLs are included in `THIRD_PARTY_NOTICES.txt`.
 

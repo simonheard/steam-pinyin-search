@@ -4,7 +4,8 @@ $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $artifactRoot = Join-Path $projectRoot 'artifacts'
 $stageRoot = Join-Path $artifactRoot 'package'
 $pluginStage = Join-Path $stageRoot 'steam-pinyin-search'
-$archivePath = Join-Path $artifactRoot 'steam-pinyin-search-v0.1.0.zip'
+$pluginVersion = (Get-Content -Raw -LiteralPath (Join-Path $projectRoot 'plugin.json') | ConvertFrom-Json).version
+$archivePath = Join-Path $artifactRoot "steam-pinyin-search-v$pluginVersion.zip"
 
 Push-Location $projectRoot
 try {
