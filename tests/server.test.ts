@@ -103,6 +103,7 @@ describe('catalog sync', () => {
     const repository = new MemoryCatalogRepository([
       { appId: 1, name: 'One', localizedName: 'Steam 中文名', type: 'game', aliases: [] },
       { appId: 2, name: 'Two', type: 'game', aliases: [] },
+      { appId: 3, name: 'Three', localizedName: 'English fallback', type: 'game', aliases: [] },
     ]);
     const fetchMock = vi.fn(async (input: URL | RequestInfo) => {
       const url = new URL(String(input));
@@ -133,10 +134,12 @@ describe('catalog sync', () => {
     });
     const result = await syncWikidataAliases(repository, { fetchImpl: fetchMock as unknown as typeof fetch });
     expect(new URL(String(fetchMock.mock.calls[0]?.[0])).searchParams.get('query')).toContain('LIMIT 200000');
-    expect(result).toMatchObject({ mappings: 2, entities: 2, matched: 2, changed: 2, localizedAdded: 1, aliasesAdded: 2 });
+    expect(result).toMatchObject({ mappings: 2, entities: 2, matched: 2, changed: 2, localizedAdded: 1, aliasesAdded: 2, staleLocalizedRemoved: 1 });
     expect(repository.getApp(1)).toMatchObject({ localizedName: 'Steam 中文名', aliases: ['社区中文名', '俗名'] });
     expect(repository.getApp(2)).toMatchObject({ localizedName: '游戏二', aliases: [] });
+    expect(repository.getApp(3)?.localizedName).toBeUndefined();
     expect(repository.getState('catalog.wikidata_last_successful_sync')).not.toBeNull();
+    expect(repository.getState('catalog.wikidata_checkpoint_entity')).toBe('');
   });
 
   it('merges curated names and aliases without creating missing catalog rows', () => {

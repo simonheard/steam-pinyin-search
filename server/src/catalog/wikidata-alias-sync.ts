@@ -3,6 +3,7 @@ import type { CatalogApp, CatalogRepository } from './types.js';
 const WDQS_ENDPOINT = 'https://query.wikidata.org/sparql';
 const USER_AGENT = 'SteamPinyinSearch/0.1 (https://github.com/simonheard/steam-pinyin-search)';
 const LAST_SUCCESSFUL_SYNC_KEY = 'catalog.wikidata_last_successful_sync';
+const LEGACY_CHECKPOINT_KEY = 'catalog.wikidata_checkpoint_entity';
 const LANGUAGES = ['zh-cn', 'zh-hans', 'zh'] as const;
 
 interface SparqlValue {
@@ -34,6 +35,7 @@ export interface WikidataAliasSyncResult {
   changed: number;
   localizedAdded: number;
   aliasesAdded: number;
+  staleLocalizedRemoved: number;
 }
 
 export interface WikidataAliasSyncOptions {
@@ -99,8 +101,25 @@ export async function syncWikidataAliases(
   let changed = 0;
   let localizedAdded = 0;
   let aliasesAdded = 0;
+  let staleLocalizedRemoved = 0;
   let processed = 0;
   let pendingUpdates: CatalogApp[] = [];
+
+  for (const app of repository.listApps()) {
+    if (!app.localizedName || /\p{Script=Han}/u.test(app.localizedName)) continue;
+    const withoutLocalizedName = { ...app };
+    delete withoutLocalizedName.localizedName;
+    pendingUpdates.push(withoutLocalizedName);
+    staleLocalizedRemoved += 1;
+    if (pendingUpdates.length >= 500) {
+      repository.upsertApps(pendingUpdates);
+      pendingUpdates = [];
+    }
+  }
+  if (pendingUpdates.length) {
+    repository.upsertApps(pendingUpdates);
+    pendingUpdates = [];
+  }
 
   for (const entity of entities.values()) {
     const label = preferredLabel(entity);
@@ -129,6 +148,7 @@ export async function syncWikidataAliases(
   if (pendingUpdates.length) repository.upsertApps(pendingUpdates);
   options.onProgress?.(processed, entities.size);
   repository.setState(LAST_SUCCESSFUL_SYNC_KEY, String(Math.floor(Date.now() / 1000)));
+  repository.setState(LEGACY_CHECKPOINT_KEY, '');
   return {
     mappings: [...entities.values()].reduce((sum, entity) => sum + entity.appIds.size, 0),
     entities: entities.size,
@@ -136,5 +156,6 @@ export async function syncWikidataAliases(
     changed,
     localizedAdded,
     aliasesAdded,
+    staleLocalizedRemoved,
   };
 }
