@@ -81,6 +81,17 @@ docker compose --profile tools run --rm pics
 
 Optional weekly systemd units are included as `deploy/systemd/steam-pinyin-search-pics.*`. Install them using the same process as the daily catalog timer. The worker uses `steam-user` only in an isolated one-shot image; audit that dependency when updating it because Steam protocol libraries parse untrusted network data.
 
+## CC0 community names and aliases
+
+The Wikidata worker joins public Wikidata items to the catalog by Steam AppID (P1733), then imports Simplified Chinese labels and aliases. A Steam/PICS localized title always wins; Wikidata can fill a missing title and adds alternate names. The worker uses only the official SPARQL and Wikibase APIs, identifies itself with a User-Agent, retries transient failures, processes entities in batches of 50, and reapplies the reviewed local alias overlay last.
+
+```bash
+docker compose --profile tools run --rm wikidata
+curl http://127.0.0.1:8787/health
+```
+
+Optional monthly systemd units are included as `deploy/systemd/steam-pinyin-search-wikidata.*`. Wikidata structured data is CC0; attribution is still included in the project documentation as a courtesy.
+
 ## Update the application
 
 ```bash

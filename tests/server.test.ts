@@ -7,6 +7,7 @@ import { syncCatalog } from '../server/src/catalog/sync';
 import { SteamStoreServiceCatalogSource } from '../server/src/catalog/steam-store-service';
 import { applyAliasDataset } from '../server/src/catalog/curated-aliases';
 import { syncPicsLocalizedNames, type PicsClient } from '../server/src/catalog/pics-localized-sync';
+import { syncWikidataAliases } from '../server/src/catalog/wikidata-alias-sync';
 
 const openApps: Array<ReturnType<typeof buildServer> extends Promise<infer T> ? T : never> = [];
 
@@ -96,6 +97,36 @@ describe('catalog sync', () => {
     expect(result).toMatchObject({ candidates: 5, scanned: 2, complete: false, remaining: 3, lastAppId: 2 });
     expect(repository.getState('catalog.pics_checkpoint_appid')).toBe('2');
     expect(repository.getState('catalog.pics_last_successful_sync')).toBeNull();
+  });
+
+  it('adds CC0 Wikidata labels and aliases without replacing a Steam localized title', async () => {
+    const repository = new MemoryCatalogRepository([
+      { appId: 1, name: 'One', localizedName: 'Steam 中文名', type: 'game', aliases: [] },
+      { appId: 2, name: 'Two', type: 'game', aliases: [] },
+    ]);
+    const fetchMock = vi.fn(async (input: URL | RequestInfo) => {
+      const url = new URL(String(input));
+      if (url.hostname === 'query.wikidata.org') {
+        return Response.json({
+          results: {
+            bindings: [
+              { item: { value: 'http://www.wikidata.org/entity/Q1' }, appid: { value: '1' } },
+              { item: { value: 'http://www.wikidata.org/entity/Q2' }, appid: { value: '2' } },
+            ],
+          },
+        });
+      }
+      return Response.json({
+        entities: {
+          Q1: { labels: { 'zh-cn': { value: '社区中文名' } }, aliases: { zh: [{ value: '俗名' }] } },
+          Q2: { labels: { zh: { value: '游戏二' } }, aliases: {} },
+        },
+      });
+    });
+    const result = await syncWikidataAliases(repository, { fetchImpl: fetchMock as unknown as typeof fetch });
+    expect(result).toMatchObject({ mappings: 2, entities: 2, matched: 2, changed: 2, localizedAdded: 1, aliasesAdded: 2 });
+    expect(repository.getApp(1)).toMatchObject({ localizedName: 'Steam 中文名', aliases: ['社区中文名', '俗名'] });
+    expect(repository.getApp(2)).toMatchObject({ localizedName: '游戏二', aliases: [] });
   });
 
   it('merges curated names and aliases without creating missing catalog rows', () => {

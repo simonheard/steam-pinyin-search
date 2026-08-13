@@ -42,5 +42,15 @@ services:
     volumes:
       - catalog-data:/data
 
+  wikidata:
+    image: steam-pinyin-search-server:local
+    profiles: ["tools"]
+    environment:
+      STEAM_PINYIN_DB: /data/catalog.sqlite
+      STEAM_PINYIN_ALIASES: "${STEAM_PINYIN_ALIASES:-/app/catalog/aliases.zh-CN.json}"
+    volumes:
+      - catalog-data:/data
+    command: ["node", "dist/server/src/wikidata-sync-cli.js"]
+
 volumes:
   catalog-data:

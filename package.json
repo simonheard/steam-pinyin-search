@@ -18,7 +18,8 @@
     "package:easy": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-easy-install.ps1",
     "server": "tsx server/src/cli.ts",
     "server:sync": "tsx server/src/sync-cli.ts",
-    "server:sync:pics": "tsx server/src/pics-sync-cli.ts"
+    "server:sync:pics": "tsx server/src/pics-sync-cli.ts",
+    "server:sync:wikidata": "tsx server/src/wikidata-sync-cli.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",

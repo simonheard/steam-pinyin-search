@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh Steam Pinyin Search Wikidata aliases monthly
+
+[Timer]
+OnCalendar=monthly
+RandomizedDelaySec=6h
+Persistent=true
+Unit=steam-pinyin-search-wikidata.service
+
+[Install]
+WantedBy=timers.target
