@@ -1,4 +1,4 @@
-import { BindPluginSettings, DialogBodyText, DialogButton, IconsModule, TextField, ToggleField, definePlugin, pluginConfig, routerHook, usePluginConfig, useWindowRef } from '@steambrew/client';
+import { BindPluginSettings, DialogBodyText, DialogButton, IconsModule, Millennium, TextField, ToggleField, definePlugin, pluginConfig, routerHook, usePluginConfig, useWindowRef } from '@steambrew/client';
 import { useEffect, useState } from 'react';
 
 import { createLogger } from '../shared/logger';
@@ -18,7 +18,7 @@ import { installLibrarySearchHook } from './steam-integration/library-search-hoo
 import { extractLibraryGames, waitForSteamGlobals } from './steam-integration/resolve';
 import type { CleanupHandle, SteamLibraryStoreLike } from './steam-integration/types';
 
-const PLUGIN_VERSION = '0.1.1';
+const PLUGIN_VERSION = '0.1.2';
 const BRIDGE_NAME = 'steam-pinyin-search-library-bridge';
 const logger = createLogger(localStorage.getItem('steam-pinyin-search:debug') === '1');
 
@@ -34,18 +34,33 @@ const bridgeRefreshListeners = new Set<() => void>();
 
 async function readRuntimeStoreSettings() {
   const mirroredServer = readMirroredServerUrl(localStorage);
-  if (mirroredServer) return { enabled: true, remoteServer: mirroredServer };
   // Keep explicit plugin-name calls behind aliases so TTC does not inject a
   // duplicate argument. Millennium 3.4 otherwise receives a numeric value in
   // the pluginName slot and rejects the config request before returning data.
   const getAll = pluginConfig.getAll as unknown as (pluginName: string) => Promise<unknown>;
   try {
-    return readStorePluginSettings(await getAll('steam-pinyin-search'));
+    const raw = await getAll('steam-pinyin-search');
+    const settings = readStorePluginSettings(raw);
+    if (settings.remoteServer || !mirroredServer) return settings;
+  } catch {
+    // Millennium 3.4.0 shipped an older config dispatcher than the current
+    // SDK. Fall through to its stable core PluginConfig_GetAll method.
+  }
+  const callServerMethod = Millennium.callServerMethod as unknown as (
+    pluginName: string,
+    methodName: string,
+    kwargs: Record<string, unknown>,
+  ) => Promise<unknown>;
+  try {
+    const raw = await callServerMethod('core', 'PluginConfig_GetAll', { plugin_name: 'steam-pinyin-search' });
+    const settings = readStorePluginSettings(raw);
+    if (settings.remoteServer || !mirroredServer) return settings;
   } catch {
     // The bound store is available in windows where config IPC is not ready.
   }
   const bindSettings = BindPluginSettings as unknown as (pluginName: string) => unknown;
-  return readBoundStoreSettings(() => bindSettings('steam-pinyin-search'));
+  const bound = readBoundStoreSettings(() => bindSettings('steam-pinyin-search'));
+  return mirroredServer ? { ...bound, remoteServer: mirroredServer } : bound;
 }
 
 function setBridgeRuntime(runtime: typeof bridgeRuntime): void {
@@ -132,15 +147,27 @@ function SettingsContent() {
   const [status, setStatus] = useState(runtimeStatus);
   const [storeEnabledValue, setStoreEnabled] = usePluginConfig<boolean>(STORE_SEARCH_ENABLED_KEY);
   const [storedServerUrl, setStoredServerUrl] = usePluginConfig<string>(STORE_SERVER_URL_KEY);
+  const [fallbackStoreEnabled, setFallbackStoreEnabled] = useState(true);
   const [serverDraft, setServerDraft] = useState('');
   const [serverMessage, setServerMessage] = useState('');
-  const storeEnabled = storeEnabledValue !== false;
+  const storeEnabled = storeEnabledValue ?? fallbackStoreEnabled;
 
   useEffect(() => {
     const timer = window.setInterval(() => setStatus({ ...runtimeStatus }), 500);
     return () => window.clearInterval(timer);
   }, []);
   useEffect(() => setServerDraft(storedServerUrl ?? ''), [storedServerUrl]);
+  useEffect(() => {
+    let cancelled = false;
+    void readRuntimeStoreSettings().then((settings) => {
+      if (cancelled) return;
+      setFallbackStoreEnabled(settings.enabled);
+      if (storedServerUrl === undefined) setServerDraft(settings.remoteServer ?? '');
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [storedServerUrl]);
   useEffect(() => {
     if (typeof storedServerUrl === 'string') writeMirroredServerUrl(localStorage, storedServerUrl);
   }, [storedServerUrl]);
@@ -184,14 +211,18 @@ function SettingsContent() {
         checked={storeEnabled}
         onChange={(checked) => {
           void persistSettingWithReadback(setStoreEnabled, async () => (await readRuntimeStoreSettings()).enabled, checked)
-            .then(() => setServerMessage('Setting saved. Reload Steam to apply it.'))
-            .catch((error) =>
-              setServerMessage(
-                isMillenniumConfigAcknowledgementError(error)
-                  ? 'Setting saved. Reload Steam to apply it.'
-                  : 'Could not save the Store switch. Check the Millennium logs.',
-              ),
-            );
+            .then(() => {
+              setFallbackStoreEnabled(checked);
+              setServerMessage('Setting saved. Reload Steam to apply it.');
+            })
+            .catch((error) => {
+              if (isMillenniumConfigAcknowledgementError(error)) {
+                setFallbackStoreEnabled(checked);
+                setServerMessage('Setting saved. Reload Steam to apply it.');
+              } else {
+                setServerMessage('Could not save the Store switch. Check the Millennium logs.');
+              }
+            });
         }}
       />
       <TextField

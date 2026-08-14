@@ -18,4 +18,11 @@ describe('plugin Store settings', () => {
     expect(() => normalizeServerUrl('file:///tmp/catalog')).toThrow(TypeError);
     expect(readStorePluginSettings({ storeServerUrl: 'not a URL' })).toEqual({ enabled: true, remoteServer: null });
   });
+
+  it('accepts the JSON-string response returned by Millennium 3.4 core config', () => {
+    expect(readStorePluginSettings('{"storeSearchEnabled":false,"storeServerUrl":"https://search.example.com/"}')).toEqual({
+      enabled: false,
+      remoteServer: 'https://search.example.com',
+    });
+  });
 });

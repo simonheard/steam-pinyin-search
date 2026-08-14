@@ -15,6 +15,13 @@ export function normalizeServerUrl(value: string | null | undefined): string | n
 }
 
 export function readStorePluginSettings(value: unknown): StorePluginSettings {
+  if (typeof value === 'string') {
+    try {
+      return readStorePluginSettings(JSON.parse(value) as unknown);
+    } catch {
+      return { enabled: true, remoteServer: null };
+    }
+  }
   if (typeof value !== 'object' || value === null) return { enabled: true, remoteServer: null };
   const settings = value as Record<string, unknown>;
   const enabled = settings[STORE_SEARCH_ENABLED_KEY] !== false;

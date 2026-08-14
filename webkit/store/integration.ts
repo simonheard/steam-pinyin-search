@@ -4,9 +4,10 @@ import { findStoreSearchElements } from '../steam-integration/store-search-eleme
 import { StoreSearchDropdown } from './dropdown';
 import type { LocalStoreCatalogEntry } from './local';
 import { HybridStoreSearchClient, readConfiguredApiBaseUrl, writeConfiguredApiBaseUrl } from './provider';
+import { getWebkitStorage } from '../storage';
 
 const DEBOUNCE_MS = 200;
-const logger = createLogger(localStorage.getItem('steam-pinyin-search:debug') === '1');
+const logger = createLogger(getWebkitStorage().getItem('steam-pinyin-search:debug') === '1');
 
 export interface StoreIntegrationHandle {
   cleanup(): void;

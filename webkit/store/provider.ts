@@ -1,6 +1,7 @@
 import type { StoreSearchResponse } from '../../shared/types';
 import { StoreSearchClient } from './api';
 import { LocalStoreSearchClient } from './local';
+import { getWebkitStorage } from '../storage';
 
 export const STORE_API_BASE_URL_KEY = 'steam-pinyin-search:api-base-url';
 
@@ -11,7 +12,7 @@ export interface StoreSearchResult {
   source: StoreSearchSource;
 }
 
-export function readConfiguredApiBaseUrl(storage: Pick<Storage, 'getItem'> = localStorage): string | null {
+export function readConfiguredApiBaseUrl(storage: Pick<Storage, 'getItem'> = getWebkitStorage()): string | null {
   const configured = storage.getItem(STORE_API_BASE_URL_KEY)?.trim();
   if (!configured) return null;
   try {
@@ -24,7 +25,7 @@ export function readConfiguredApiBaseUrl(storage: Pick<Storage, 'getItem'> = loc
 
 export function writeConfiguredApiBaseUrl(
   url: string | null,
-  storage: Pick<Storage, 'setItem' | 'removeItem'> = localStorage,
+  storage: Pick<Storage, 'setItem' | 'removeItem'> = getWebkitStorage(),
 ): string | null {
   const configured = url?.trim();
   if (!configured) {

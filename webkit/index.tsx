@@ -21,7 +21,7 @@ type PluginGlobal = typeof globalThis & { [GLOBAL_KEY]?: GlobalState; SteamPinyi
 export default async function WebkitMain(): Promise<void> {
   const scope = globalThis as PluginGlobal;
   scope[GLOBAL_KEY]?.cleanup();
-  const pluginSettings = readWebkitStoreSettings();
+  const pluginSettings = await readWebkitStoreSettings();
   if (!pluginSettings.enabled) new LocalStoreSearchClient().clear();
 
   let integration: StoreIntegrationHandle | null = null;

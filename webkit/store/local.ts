@@ -2,6 +2,7 @@ import { indexStoreGame } from '../../shared/index-game';
 import { normalizeSearchText } from '../../shared/normalize';
 import { searchGames } from '../../shared/search';
 import type { StoreGameIndex, StoreSearchResponse } from '../../shared/types';
+import { getWebkitStorage } from '../storage';
 
 export const LOCAL_STORE_CATALOG_KEY = 'steam-pinyin-search:local-store-catalog:v1';
 const LOCAL_STORE_SCHEMA_VERSION = 1;
@@ -63,7 +64,7 @@ export class LocalStoreSearchClient {
   readonly #entries = new Map<number, LocalStoreCatalogEntry>();
   #games: StoreGameIndex[] = [];
 
-  constructor(private readonly storage: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> = localStorage) {
+  constructor(private readonly storage: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> = getWebkitStorage()) {
     this.#load();
   }
 

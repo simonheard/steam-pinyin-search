@@ -171,6 +171,7 @@ Tests cover normalization, pinyin, initials, ranking, cache diffs, a 5,000-game 
 - **Plugin is absent:** verify the directory name, `plugin.json`, compiled `.millennium/Dist` files, and that the plugin is enabled in Millennium settings.
 - **Library search is unchanged:** enable debug logging. Steam may have changed `appStore`, `LibraryUIStore`, `MatchesImpl`, or `SetSearchSuggestions`; native search remains intact when discovery fails.
 - **Store dropdown is absent:** confirm Store search is enabled and Steam was reloaded after the settings change. Queries shorter than two normalized characters intentionally do nothing. Check the configured API URL, CORS origin, HTTPS/mixed-content policy, and WebKit DevTools.
+- **Millennium says it could not save online settings:** install v0.1.2 or newer. Millennium 3.4.0 can persist the value while returning a legacy JSON-string response that newer SDK helpers reject; the plugin now reads both formats and verifies the saved value through the compatible core route.
 - **API returns no games:** run catalog sync with a valid server-side Web API key, then restart the API to reload its in-memory index.
 - **Chinese Store titles are missing:** the official bulk catalog does not provide a dependable `schinese` title field. Enable the optional details adapter only after accepting the documented unofficial-endpoint risk and synchronization cost.
 - **Steam update broke selectors:** update only the centralized semantic selector/fallback lists; do not scatter hashed class names across UI code.

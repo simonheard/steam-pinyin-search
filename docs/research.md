@@ -141,6 +141,8 @@ On 2026-08-12 the deprecated keyless endpoint also returned HTTP 404 to a direct
 
 Store enhancement is user-controllable through the plugin's Millennium settings page. The master switch and optional server URL use Millennium 3.4's persistent `usePluginConfig`/`BindPluginSettings` API so the main Steam frontend and Store WebKit views read the same configuration. Turning Store search off skips the observer/UI hook and clears this plugin's local Store catalog on the next Store view load. TTC 3.3.7 currently fails to inject the plugin name into the WebKit `BindPluginSettings` call, so the WebKit adapter passes the stable manifest plugin ID explicitly; the generated production bundle is checked for that binding.
 
+Runtime testing against the released Millennium 3.4.0 binary found an SDK/core compatibility split: the newer numeric plugin-config dispatcher fails with `json.exception.type_error.302`, while the stable core `PluginConfig_GetAll` route returns the persisted object as a JSON string. Since v0.1.2, both the main frontend and Store WebKit adapter try the modern API first, then read and parse the legacy core response. Settings writes retain readback verification, and restricted `data:` utility views use a non-persistent in-memory storage fallback so they cannot disrupt native Steam pages.
+
 ### Localized Chinese names
 
 Steam officially supports localized application names and documents `schinese`/`zh-CN` and `tchinese`/`zh-TW`. However, the documented `IStoreService/GetAppList` response does not promise all localized titles. `have_description_language` is a filter, not a localized-name projection.
