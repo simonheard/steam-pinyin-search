@@ -3,6 +3,11 @@
 核对日期：2026-08-14。官方插件库接收的是公开 Git 仓库的 Git submodule，
 不是 ZIP。每次更新都需要新的 PluginDatabase pull request 推进 submodule commit。
 
+当前官方提交：[PluginDatabase PR #225](https://github.com/SteamClientHomebrew/PluginDatabase/pull/225)。
+PR 已固定到 v0.1.2 commit `5c3c55c`，如实保留 Stable/Beta 联合测试项未勾选并说明
+Beta 中 Millennium 在插件加载前崩溃。上游 Test Build 当前为 `action_required`，需要
+PluginDatabase 维护者批准首次贡献者工作流后才会运行，不代表构建失败。
+
 ## 本仓库已经准备好
 
 - [x] 公开源代码、MIT License、第三方声明。
@@ -19,7 +24,7 @@
   Millennium 3.4.0 在插件前端加载前连续三次发生 `EXCEPTION_ACCESS_VIOLATION`。
 - [ ] Millennium 支持该 Beta build 后，重新完成插件启用、搜索和重载验证；当前不得
   声明插件通过 Steam Beta 测试。
-- [x] 确认 GitHub Actions 在仓库中全部通过（CI #6，2026-08-14）。
+- [x] 确认 GitHub Actions 在仓库中全部通过（CI #7，2026-08-14）。
 - [x] 已正式发布 v0.1.2 GitHub Release，并附上普通 ZIP、小白 ZIP 与校验值。
 - [ ] 在 PluginDatabase PR 中等待独立第三方测试者勾选 Stable/Beta 验证框；作者
   不应自行勾选这两个第三方确认项。
