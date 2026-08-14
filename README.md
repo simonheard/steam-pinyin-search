@@ -123,7 +123,7 @@ Store mode defaults to local and makes no plugin API request. Successful remote 
 Configure it through **Steam → Settings → Millennium → Plugins → Steam Pinyin Search**:
 
 - **Enable Store pinyin search** is the master switch. Disable it and reload Steam to skip Store injection and delete the plugin's local Store catalog.
-- Leave **Online search server (optional)** empty for local-only mode, enter your own HTTPS deployment, or use the maintained public instance `https://steam-search.hede.wang`.
+- Leave **Online search server (optional)** empty for local-only mode, or enter an HTTPS deployment you control. The project does not publish or configure a default public server URL.
 - Enter the self-hosted HTTPS base URL for remote-first Store search and online Library community aliases. Store failures fall back locally; Library failures leave the original local search untouched.
 - Save, then reload Steam to apply the settings across Store WebKit views.
 

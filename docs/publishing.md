@@ -82,7 +82,7 @@ The safety model intentionally prevents repository changes from auto-publishing 
 - Optionally publish the versioned `steam-pinyin-search-v*.zip` as a GitHub Release asset for manual beta testing.
 - Publish the Windows easy-install ZIP separately and label it Windows-only.
 - Do not bundle an unofficial Linux or macOS Millennium installer. Link to upstream installation instructions instead.
-- The optional maintained API is available at `https://steam-search.hede.wang`; the plugin still defaults to local-only and the service can be self-hosted.
+- The plugin defaults to local-only. Users may configure an HTTPS API they control, and the included server can be self-hosted; no private test hostname is published.
 
 ## Sources
 

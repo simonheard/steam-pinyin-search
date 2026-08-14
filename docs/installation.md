@@ -55,7 +55,7 @@ Installer v1.12.1。它会联网下载当前稳定 Millennium，不是冻结版�
 
 - **Enable Store pinyin search**：商店增强总开关；不需要商店搜索时可以关闭。
 - **Online search server (optional)**：可填写自己的服务地址，也可以使用项目维护的
-  `https://steam-search.hede.wang`。
+  `https://search.example.com`（替换为你自己的服务地址）。
 - 留空时为纯本地模式；新安装的本地商店目录为空，仍保留 Steam 原生搜索。
 - 配置服务器后，商店搜索会远程优先、本地兜底；Library 也能搜索服务器中的
   “老头环”等社区别名。
