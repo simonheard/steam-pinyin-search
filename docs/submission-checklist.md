@@ -1,6 +1,6 @@
 # Millennium PluginDatabase 提交准备
 
-核对日期：2026-08-13。官方插件库接收的是公开 Git 仓库的 Git submodule，
+核对日期：2026-08-14。官方插件库接收的是公开 Git 仓库的 Git submodule，
 不是 ZIP。每次更新都需要新的 PluginDatabase pull request 推进 submodule commit。
 
 ## 本仓库已经准备好
@@ -19,8 +19,8 @@
   Millennium 3.4.0 在插件前端加载前连续三次发生 `EXCEPTION_ACCESS_VIOLATION`。
 - [ ] Millennium 支持该 Beta build 后，重新完成插件启用、搜索和重载验证；当前不得
   声明插件通过 Steam Beta 测试。
-- [x] 确认 GitHub Actions 在仓库中全部通过（CI #2，2026-08-13）。
-- [x] 已创建 v0.1.0 GitHub pre-release，并附上两个 ZIP 及 SHA-256。
+- [x] 确认 GitHub Actions 在仓库中全部通过（CI #6，2026-08-14）。
+- [x] 已正式发布 v0.1.2 GitHub Release，并附上普通 ZIP、小白 ZIP 与校验值。
 - [ ] 在 PluginDatabase PR 中等待独立第三方测试者勾选 Stable/Beta 验证框；作者
   不应自行勾选这两个第三方确认项。
 - [ ] 官方模板高度鼓励先测试另外两个待审插件并附反馈链接，可在提交 PR 前完成。
@@ -69,8 +69,8 @@ git push -u origin add-steam-pinyin-search
 
 然后向 `SteamClientHomebrew/PluginDatabase` 开 pull request，选择 **Plugin
 Submission** 模板。提交中的 submodule 应固定到已经测试、CI 通过且与最新 Release
-一致的 commit。当前应使用 v0.1.1 commit，而不是旧的 v0.1.0 tag；v0.1.1
-包含 Millennium 3.4 设置保存兼容修复。
+一致的 commit。当前应固定到 `v0.1.2` / commit `5c3c55c`；该版本已经包含
+Millennium 3.4 设置读写兼容修复，并完成在线模式实机确认。
 
 ## 可复制的 PR 说明草稿
 

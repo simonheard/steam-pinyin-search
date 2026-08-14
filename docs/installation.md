@@ -90,7 +90,9 @@ Library 本地拼音搜索继续工作。
   `.millennium/Dist/index.js`、`.millennium/Dist/webkit.js` 是否存在。
 - **商店没有下拉结果**：确认开关已打开、查询至少两个字符、保存后已重载 Steam；
   纯本地模式必须先从远程结果学习或手工导入目录。
-- **在线地址保存失败**：必须填写有效的 `http://` 或 `https://` 基础地址；公开服务
-  推荐 HTTPS。打开 Millennium 日志查看 `[SteamPinyinSearch]` 错误。
+- **在线地址保存失败**：先确认使用 v0.1.2 或更新版本；v0.1.2 已兼容 Millennium
+  3.4.0 的旧版 JSON 字符串配置响应。地址必须是有效的 `http://` 或 `https://`
+  基础地址；公开服务推荐 HTTPS。仍失败时打开 Millennium 日志查看
+  `[SteamPinyinSearch]` 错误。
 - **Steam 更新后搜索失效**：先禁用插件保证原生行为，再到 GitHub Issues 提交 Steam
   分支、Millennium 版本和调试日志。插件找不到 hook 时会停止增强而不是强行修改 UI。

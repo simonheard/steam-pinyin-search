@@ -24,6 +24,18 @@ Validation date: 2026-08-12. Steam desktop build `1785799196`, Simplified Chines
 
 The runtime check confirms loading and hook mounting. Automated search/ranking coverage remains responsible for exact result sets; a public release should still be checked after every Steam/Millennium update.
 
+## v0.1.2 online settings and remote search validation
+
+Validation date: 2026-08-14, Windows Steam Stable, Millennium v3.4.0.
+
+- Millennium's released 3.4.0 core returned persisted plugin config as a JSON string through `PluginConfig_GetAll`; the v0.1.2 compatibility adapter parsed it successfully.
+- Startup logs reported `plugin settings detected: remote=true, store=true` and `library online alias search enabled`.
+- The Store WebKit hook mounted after reading the same configured server.
+- Saving `https://steam-search.hede.wang` was confirmed usable by the user after the compatibility fix.
+- The public service health endpoint reported `ok=true` with 179,046 indexed entries during validation.
+- `laotouhuan` returned ELDEN RING / 艾尔登法环 and `heishenhua` returned Black Myth: Wukong / 黑神话：悟空.
+- No new `localStorage` security error appeared after restricted `data:` views were given an in-memory fallback.
+
 ## Steam Client Beta attempt
 
 Validation date: 2026-08-13.

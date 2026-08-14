@@ -48,7 +48,7 @@ On Windows, current runtime source (`src/system/environment.cc`) sets `MILLENNIU
 
 The Lua backend must call `millennium.ready()` promptly (documentation says within 10 seconds and recommends within 1 second). The current template exposes `on_load`, `on_frontend_loaded`, and `on_unload`. Frontend plugins may return `onDismount()` from `definePlugin()`; every patch, observer, timer, listener, and React root added by this project must be released there. WebKit code must be idempotent because browser navigation/recreation can execute it again.
 
-The development machine currently has Steam installed at `C:\Program Files (x86)\Steam` but does not currently have Millennium installed, so an end-to-end Steam runtime check cannot be claimed until Millennium is installed.
+The development machine has Steam and Millennium 3.4.0 installed. Windows Steam Stable runtime validation now covers plugin startup, local Library indexing, input-fallback mounting, Store WebKit mounting, persistent online settings, remote Store lookup, and remote Library community aliases. Steam Beta remains blocked by an upstream Millennium loader crash before plugin startup.
 
 ## Hooking and patching Steam React UI
 

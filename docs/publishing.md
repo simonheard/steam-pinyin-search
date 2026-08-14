@@ -1,6 +1,6 @@
 # Platform installation and Millennium publication
 
-Verified against the official Millennium documentation and repositories on 2026-08-12.
+Verified against the official Millennium documentation and repositories on 2026-08-14. The current public release is [v0.1.2](https://github.com/simonheard/steam-pinyin-search/releases/tag/v0.1.2).
 
 ## Platform support
 

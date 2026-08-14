@@ -6,6 +6,8 @@ Library data stays on the user's machine. Store search makes no plugin network r
 
 **普通用户请直接看 [中文安装、升级与卸载教程](docs/installation.md)。** 本项目提供手动插件 ZIP 和包含官方 Millennium Installer 的 Windows 裸 Steam 小白包。Millennium 官方商店不接收 ZIP；正式收录前后的流程见 [提交准备清单](docs/submission-checklist.md)。
 
+当前稳定版是 [v0.1.2](https://github.com/simonheard/steam-pinyin-search/releases/tag/v0.1.2)：普通 Millennium 用户下载 `steam-pinyin-search-v0.1.2.zip`，Windows 裸 Steam 用户下载 `steam-pinyin-search-easy-install-v0.1.2.zip`。该版本已在 Windows Steam Stable + Millennium 3.4.0 上确认 Library 在线别名、Store 远程搜索及设置保存可用。
+
 ## Platform compatibility
 
 | Platform | Millennium status | This plugin |
